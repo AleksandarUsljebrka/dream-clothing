@@ -23,7 +23,7 @@
   });
   $('.js-year').textContent = new Date().getFullYear();
 
-  /* ---------- Traka sa porukama ---------- */
+  /* ---------- Traka sa citatima ---------- */
   const tapeItems = designs.map(d => `<span class="tape__item">${esc(quoteOf(d))}<span class="tape__x">✕</span></span>`).join('');
   $$('.js-tape').forEach(t => { t.innerHTML = tapeItems + tapeItems + tapeItems + tapeItems; });
   $$('.js-ig-dm').forEach(a => { a.href = igUrl; });
@@ -356,37 +356,37 @@
     touchX = null;
   });
 
-  /* ---------- Tvoja rečenica ---------- */
+  /* ---------- Tvoj citat ---------- */
   const form = $('.js-line-form');
   const ta = $('#line');
   const count = $('.js-line-count');
   ta.addEventListener('input', () => { count.textContent = `${ta.value.length} / 60`; });
-  // Dva koraka: 1) kopiraj rečenicu i reci to na sajtu, 2) korisnik sam otvori Instagram i nalepi je.
+  // Dva koraka: 1) kopiraj citat i reci to na sajtu, 2) korisnik sam otvori Instagram i nalepi ga.
   // Instagram ne dozvoljava da sajt unapred upiše tekst u poruku, pa nalepljivanje mora da uradi korisnik.
   const next = $('.js-line-next');
   const msg = $('.js-line-msg');
   form.addEventListener('submit', async e => {
     e.preventDefault();
     const line = ta.value.trim();
-    if (!line) { ta.focus(); say('Prvo upiši svoju rečenicu.'); return; }
+    if (!line) { ta.focus(); say('Prvo upiši svoj citat.'); return; }
     const text = `Predlog za novu Dream majicu: „${line}"`;
     const ok = await copy(text);
     if (ok) {
-      msg.textContent = 'Kopirano. Otvori Instagram, klikni na poruku i nalepi rečenicu.';
+      msg.textContent = 'Kopirano. Otvori Instagram, klikni na poruku i nalepi citat.';
     } else {
       // Kopiranje nije dozvoljeno (stariji browser ili podešavanja): označi tekst da ga korisnik kopira sam
       ta.focus(); ta.select();
-      msg.textContent = 'Nismo uspeli da kopiramo. Rečenica je označena, kopiraj je pa otvori Instagram.';
+      msg.textContent = 'Nismo uspeli da kopiramo. Citat je označen, kopiraj ga pa otvori Instagram.';
     }
     next.hidden = false;
   });
-  // Kad se rečenica promeni, drugi korak nestaje dok se ponovo ne kopira
+  // Kad se citat promeni, drugi korak nestaje dok se ponovo ne kopira
   ta.addEventListener('input', () => { next.hidden = true; });
 
   /* ---------- Prelamanje srpskog teksta ----------
      Kratke reči (u, i, a, s, da, se, ti, na...) ne ostaju same na kraju reda:
      vežu se za sledeću reč nevidljivim razmakom (non-breaking space).
-     Poruke sa majica su na engleskom i ne diraju se. */
+     Citati sa majica su na engleskom i ne diraju se. */
   (() => {
     const short = /(^|[\s(„])(a|i|o|u|s|k|da|se|ti|je|na|za|po|od|do|iz|sa|ne|ni|mi|ih|kad|što) (?=\S)/gi;
     const skip = '.design__quote, .tape, .gcard__cap, .trail__word, .footer__claim, textarea, script';
