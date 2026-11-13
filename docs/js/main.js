@@ -55,11 +55,16 @@
       return;
     }
 
-    let k = 0, z = 1, last = null, lastMove = 0, t = 0, raf = 0;
-    const spawn = (x, y) => {
-      const gap = Math.max(70, Math.min(130, root.clientWidth * 0.075));
+    let k = 0, z = 1, last = null, lastMove = 0, lastSpawn = 0, t = 0, raf = 0;
+    // Nova slika iskače tek kad se miš pomeri dovoljno daleko (gap)
+    // i kad prođe dovoljno vremena od prethodne (minDelay), da ih ne bude previše odjednom
+    const spawn = (x, y, minDelay) => {
+      const now = performance.now();
+      const gap = Math.max(150, Math.min(280, root.clientWidth * 0.16));
       if (last && Math.hypot(x - last.x, y - last.y) < gap) return;
+      if (now - lastSpawn < minDelay) return;
       last = { x, y };
+      lastSpawn = now;
       const el = imgs[k++ % imgs.length];
       const w = el.offsetWidth || 200, h = el.offsetHeight || 300;
       el.style.left = `${x - w / 2}px`;
@@ -75,16 +80,16 @@
       if (e.pointerType !== 'mouse') return;
       lastMove = performance.now();
       const r = root.getBoundingClientRect();
-      spawn(e.clientX - r.left, e.clientY - r.top);
+      spawn(e.clientX - r.left, e.clientY - r.top, 180);
     });
 
     // Kad miš miruje (ili na telefonu), slike same idu po talasastoj putanji
     const tick = () => {
       raf = requestAnimationFrame(tick);
-      if (performance.now() - lastMove < 1800) return;
-      t += 0.012;
+      if (performance.now() - lastMove < 2500) return;
+      t += 0.006;
       const w = root.clientWidth, h = root.clientHeight;
-      spawn(w * (0.5 + 0.36 * Math.sin(t * 1.3)), h * (0.5 + 0.3 * Math.sin(t * 2.1 + 0.6)));
+      spawn(w * (0.5 + 0.36 * Math.sin(t * 1.3)), h * (0.5 + 0.3 * Math.sin(t * 2.1 + 0.6)), 700);
     };
 
     // Animacija radi samo dok je hero na ekranu
@@ -94,13 +99,11 @@
     }).observe(root);
   })();
   /* ---------- Kolekcija ---------- */
-  const total = designs.length;
   $$('.js-designs').forEach(list => {
     const mood = list.dataset.mood;
     list.innerHTML = designs
-      .map((d, i) => ({ d, i }))
-      .filter(({ d }) => d.mood === mood)
-      .map(({ d, i }) => {
+      .filter(d => d.mood === mood)
+      .map(d => {
         const thumbs = d.photos > 1
           ? `<div class="thumbs" role="group" aria-label="Fotografije dizajna">${Array.from({ length: d.photos }, (_, k) => `
               <button type="button" class="thumb${k === 0 ? ' is-active' : ''}" data-n="${k + 1}" aria-label="Fotografija ${k + 1}">
@@ -109,11 +112,9 @@
           : '';
         return `
         <article class="design" data-slug="${d.slug}">
-          <div class="design__text">
-            <p class="design__num mono">${String(i + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}</p>
-            <h3 class="design__quote display">${d.lines.map(l => `<span class="line"><span>${esc(l)}</span></span>`).join('')}</h3>
+          <div class="design__text">            <h3 class="design__quote display">${d.lines.map(l => `<span class="line"><span>${esc(l)}</span></span>`).join('')}</h3>
             <p class="design__meaning">${esc(d.meaning)}</p>
-            <p class="design__meta mono">Crna majica — beli print — print on demand</p>
+            <p class="design__meta mono">Crna majica — beli print — štampa po porudžbini</p>
             <div class="design__actions">
               <a class="btn js-want" href="${dmUrl}" target="_blank" rel="noopener" data-quote="${esc(quoteOf(d))}">Naruči <span aria-hidden="true">↗</span></a>
             </div>

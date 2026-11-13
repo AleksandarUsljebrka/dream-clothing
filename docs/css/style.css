@@ -181,7 +181,6 @@ html[data-hero="full"] [data-variant="full"] { display: block; }
   display: flex; justify-content: space-between; align-items: flex-end; gap: 24px;
 }
 .trail__line { font-size: clamp(24px, 2.2vw, 30px); line-height: 1.1; max-width: 13em; }
-.trail__hint { color: rgba(239, 233, 223, .6); }
 .btn.btn--accent { background: var(--red); border-color: var(--red); color: #fff; }
 .btn.btn--accent:hover { background: var(--cream); border-color: var(--cream); color: var(--ink); }
 
@@ -240,7 +239,6 @@ html[data-hero="full"] [data-variant="full"] { display: block; }
 .design:nth-child(even) .design__text { grid-column: 8 / 13; grid-row: 1; }
 .design:nth-child(even) .design__media { grid-column: 1 / 8; grid-row: 1; }
 
-.design__num { color: var(--muted); padding-bottom: 18px; margin-bottom: 26px; border-bottom: 1px solid var(--line); }
 .design__quote { font-size: clamp(46px, 5.6vw, 92px); }
 .design__quote .line { display: block; overflow: hidden; }
 .design__quote .line > span { display: inline-block; transform: translateY(105%); transition: transform 1s var(--ease); }
@@ -366,7 +364,6 @@ html[data-hero="full"] [data-variant="full"] { display: block; }
 
   .trail { min-height: 520px; cursor: auto; }
   .trail__img { width: clamp(130px, 40vw, 190px); }
-  .trail__hint { display: none; }
   .trail__bottom { flex-direction: column; align-items: flex-start; gap: 18px; }
 
   .intro { grid-template-columns: minmax(0, 1fr); row-gap: 28px; min-height: 0; padding-top: 20px; }

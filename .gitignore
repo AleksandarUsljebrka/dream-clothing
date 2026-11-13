@@ -1,0 +1,20 @@
+# Lokalna podešavanja za Claude Code (putanje važe samo na ovom računaru)
+.claude/
+
+# ZIP sa fotografijama, iste slike već postoje u photos/
+*.zip
+
+# Sistemski fajlovi (Windows / macOS)
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Editori
+.vscode/
+.idea/
+
+# Logovi i privremeni fajlovi
+*.log
+*.tmp
+__pycache__/
+node_modules/
