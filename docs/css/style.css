@@ -1,0 +1,409 @@
+/* =========================================================
+   DREAM CLOTHING
+   Svetla tema prati dnevne fotografije, tamna noćne.
+   Sve stoji u jednom kontejneru (--container), poravnato levo i desno.
+   ========================================================= */
+
+:root {
+  --bone: #ece5d6;
+  --bone-2: #e2d9c6;
+  --ink: #0b0a09;
+  --ink-2: #161412;
+  --sun: #d98a2b;
+  --red: #e3342b;
+  --cream: #efe9df;
+
+  --f-display: 'Anton', 'Impact', 'Arial Narrow', sans-serif;
+  --f-serif: 'Instrument Serif', 'Times New Roman', serif;
+  --f-mono: 'Space Mono', ui-monospace, monospace;
+  --f-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --container: 1360px;
+  --gutter: clamp(16px, 4vw, 48px);
+  --header-h: 72px;
+  --ease: cubic-bezier(.2, .7, .1, 1);
+}
+
+body[data-theme="day"] {
+  --bg: var(--bone);
+  --fg: #14120f;
+  --muted: rgba(20, 18, 15, .62);
+  --line: rgba(20, 18, 15, .16);
+  --accent: var(--sun);
+  --surface: var(--bone-2);
+}
+body[data-theme="night"] {
+  --bg: var(--ink);
+  --fg: var(--cream);
+  --muted: rgba(239, 233, 223, .6);
+  --line: rgba(239, 233, 223, .14);
+  --accent: var(--red);
+  --surface: var(--ink-2);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; overflow-x: clip; scroll-padding-top: var(--header-h); }
+body {
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: var(--f-sans);
+  font-size: 17px;
+  line-height: 1.55;
+  transition: background-color .9s var(--ease), color .9s var(--ease);
+  -webkit-font-smoothing: antialiased;
+}
+img { display: block; max-width: 100%; }
+a { color: inherit; }
+button { font: inherit; color: inherit; cursor: pointer; }
+h1, h2, h3, p, figure, ol { margin: 0; }
+::selection { background: var(--accent); color: var(--ink); }
+
+/* Jedan kontejner za ceo sajt: ista širina i iste ivice za svaku sekciju */
+.wrap { width: 100%; max-width: calc(var(--container) + 2 * var(--gutter)); margin-inline: auto; padding-inline: var(--gutter); }
+.section { padding-block: clamp(96px, 12vw, 180px); }
+/* Linija između sekcija ide samo preko širine sadržaja */
+.section--ruled { padding-top: 0; }
+.section--ruled > .wrap::before { content: ''; display: block; height: 1px; background: var(--line); margin-bottom: clamp(96px, 12vw, 180px); }
+
+.display { font-family: var(--f-display); font-weight: 400; text-transform: uppercase; line-height: .9; letter-spacing: -.005em; }
+.serif { font-family: var(--f-serif); font-weight: 400; }
+.serif em, em.serif { font-style: italic; }
+.mono { font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+.label { color: var(--muted); margin-bottom: clamp(24px, 3vw, 40px); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Grain preko celog sajta, kao na noćnim fotografijama */
+.grain {
+  position: fixed; inset: -50%; z-index: 100; pointer-events: none; opacity: .07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 1.2s steps(6) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); } 20% { transform: translate(-3%, 2%); } 40% { transform: translate(2%, -3%); }
+  60% { transform: translate(-2%, -1%); } 80% { transform: translate(3%, 3%); } 100% { transform: translate(0, 0); }
+}
+
+/* ---------- HEADER ---------- */
+.header { position: fixed; inset: 0 0 auto; z-index: 50; color: #fff; mix-blend-mode: difference; }
+.header__inner { height: var(--header-h); display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.logo { font-family: var(--f-sans); font-weight: 900; font-size: 28px; letter-spacing: -.06em; text-decoration: none; line-height: 1; }
+.nav { display: flex; gap: clamp(16px, 2.4vw, 36px); }
+.nav a, .header__cta { font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; text-decoration: none; }
+.nav a { position: relative; }
+.nav a::after { content: ''; position: absolute; left: 0; right: 0; bottom: -4px; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform .4s var(--ease); }
+.nav a:hover::after { transform: scaleX(1); transform-origin: left; }
+.header__cta { border: 1px solid currentColor; border-radius: 99px; padding: 8px 14px; transition: background .3s, color .3s; }
+.header__cta:hover { background: #fff; color: #000; }
+
+/* ---------- HERO ----------
+   Slika ide preko celog ekrana, a tekst u njoj stoji na ivicama kontejnera (--edge). */
+.hero {
+  --edge: max(var(--gutter), calc((100% - var(--container)) / 2));
+  position: relative; container-type: inline-size;
+  height: 100svh; min-height: 560px;
+  display: grid; grid-template-columns: 1fr 1fr;
+  background: #000; color: var(--cream); overflow: hidden;
+}
+.hero__photo { position: relative; overflow: hidden; }
+.hero__photo img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.1); animation: heroIn 2.6s var(--ease) forwards; }
+.hero__photo--1 img { object-position: 50% 55%; }
+.hero__photo--2 img { object-position: 40% 40%; animation-delay: .15s; }
+@keyframes heroIn { to { transform: scale(1); } }
+
+/* Zatamnjenje odozdo i sleva, tamo gde stoji naslov.
+   Gornji deo ostaje svetliji pa se printovi na majicama i dalje vide. */
+.hero::after {
+  content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background:
+    linear-gradient(0deg, rgba(0,0,0,.82) 0%, rgba(0,0,0,.55) 28%, rgba(0,0,0,.12) 60%, rgba(0,0,0,.2) 100%),
+    linear-gradient(90deg, rgba(0,0,0,.45) 0%, rgba(0,0,0,0) 65%);
+}
+
+.hero__content { position: absolute; z-index: 3; left: 0; right: 0; bottom: 0; padding: 0 var(--edge) clamp(36px, 7vh, 72px); }
+.hero__kicker { color: rgba(239,233,223,.8); margin-bottom: clamp(14px, 1.6cqw, 22px); opacity: 0; animation: fadeUp 1s .9s var(--ease) forwards; }
+.hero__title { font-size: clamp(52px, 9.2cqw, 132px); }
+.hero__title .line { display: block; overflow: hidden; padding-bottom: .02em; }
+.hero__title .line > span { display: inline-block; transform: translateY(105%); animation: lineUp 1.1s var(--ease) forwards; }
+.hero__title .line:nth-child(2) > span { animation-delay: .12s; }
+.hero__title .line:nth-child(3) > span { animation-delay: .24s; }
+.hero__sub { font-size: clamp(24px, 2.6cqw, 36px); margin-top: clamp(12px, 1.4cqw, 20px); color: var(--cream); opacity: 0; animation: fadeUp 1s 1.1s var(--ease) forwards; }
+.hero__scroll { position: absolute; z-index: 3; right: var(--edge); bottom: clamp(36px, 7vh, 72px); display: flex; align-items: center; gap: 8px; text-decoration: none; color: rgba(239,233,223,.85); }
+.hero__scroll span { display: inline-block; animation: bob 1.8s ease-in-out infinite; }
+/* Privremeno, za poređenje: prikazuje se samo hero varijanta izabrana u <html data-hero> */
+[data-variant] { display: none; }
+html[data-hero="trail"] [data-variant="trail"],
+html[data-hero="split"] [data-variant="split"],
+html[data-hero="full"] [data-variant="full"] { display: block; }
+
+/* ---------- TRAG SLIKA (hero) ---------- */
+.trail {
+  --edge: max(var(--gutter), calc((100cqw - var(--container)) / 2));
+  position: relative; container-type: inline-size; isolation: isolate;
+  height: 100svh; min-height: 600px; overflow: hidden;
+  background: var(--ink); color: var(--cream); cursor: crosshair;
+}
+/* Slike su u svom sloju iznad natpisa i potpuno neprovidne, da se majice vide čisto */
+.trail__imgs { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.trail__img {
+  position: absolute; left: -999px; top: -999px;
+  width: clamp(170px, 19vw, 300px); aspect-ratio: 2 / 3; object-fit: cover;
+  opacity: 0; will-change: transform, opacity; box-shadow: 0 30px 60px rgba(0,0,0,.5);
+}
+.trail__img.go { animation: trailPop 1.8s cubic-bezier(.2, .7, .2, 1) both; }
+.trail__img.still { opacity: 1; transform: rotate(var(--r, 0deg)); }
+/* Slika nikad nije providna: iskoči, stoji, pa je ivica „preseče" odozdo nagore */
+@keyframes trailPop {
+  0% { opacity: 0; transform: scale(.7) rotate(var(--r, 0deg)); clip-path: inset(0 0 0 0); }
+  4% { opacity: 1; }
+  10% { transform: scale(1) rotate(var(--r, 0deg)); }
+  80% { clip-path: inset(0 0 0 0); }
+  100% { opacity: 1; transform: scale(1) rotate(var(--r, 0deg)); clip-path: inset(0 0 100% 0); }
+}
+
+/* DREAM je tačno širok kao kontejner sajta */
+.trail__word {
+  position: absolute; left: 50%; top: 50%; z-index: 1; margin: 0;
+  transform: translate(-50%, -56%);
+  font-size: calc((100cqw - 2 * var(--edge)) / 2.52); /* 2.52 = širina reči DREAM u Anton fontu, u em */
+  line-height: .8; letter-spacing: -.01em; white-space: nowrap;
+  color: var(--cream); pointer-events: none;
+}
+.trail__word span { display: inline-block; animation: trailUp 1.2s var(--ease) both; }
+.trail__word span:nth-child(2) { animation-delay: .07s; }
+.trail__word span:nth-child(3) { animation-delay: .14s; }
+.trail__word span:nth-child(4) { animation-delay: .21s; }
+.trail__word span:nth-child(5) { animation-delay: .28s; }
+@keyframes trailUp { from { transform: translateY(40%); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.trail__bottom {
+  position: absolute; z-index: 3; left: var(--edge); right: var(--edge); bottom: clamp(28px, 6vh, 56px);
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 24px;
+}
+.trail__line { font-size: clamp(24px, 2.2vw, 30px); line-height: 1.1; max-width: 13em; }
+.trail__hint { color: rgba(239, 233, 223, .6); }
+.btn.btn--accent { background: var(--red); border-color: var(--red); color: #fff; }
+.btn.btn--accent:hover { background: var(--cream); border-color: var(--cream); color: var(--ink); }
+
+/* ---------- INTRO (novi hero) ---------- */
+.intro-wrap { padding-top: var(--header-h); }
+.intro {
+  display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: clamp(16px, 3vw, 48px);
+  min-height: calc(100svh - var(--header-h) - 64px);
+  padding-top: clamp(12px, 2vw, 28px); padding-bottom: clamp(24px, 3vw, 40px);
+}
+.intro__text { grid-column: 1 / 7; align-self: end; container-type: inline-size; padding-bottom: clamp(4px, 1.5vw, 20px); }
+.intro__kicker { color: var(--muted); margin-bottom: clamp(18px, 2vw, 28px); opacity: 0; animation: fadeUp 1s .7s var(--ease) forwards; }
+.intro__title { font-size: clamp(44px, 18cqw, 128px); }
+.intro__title .line { display: block; overflow: hidden; padding-bottom: .02em; }
+.intro__title .line > span { display: inline-block; transform: translateY(105%); animation: lineUp 1.1s var(--ease) forwards; }
+.intro__title .line:nth-child(2) > span { animation-delay: .12s; }
+.intro__title .line:nth-child(3) > span { animation-delay: .24s; }
+.intro__title .line:last-child { color: var(--accent); }
+.intro__sub { font-size: clamp(26px, 2.6vw, 38px); margin-top: clamp(14px, 1.6vw, 22px); opacity: 0; animation: fadeUp 1s .9s var(--ease) forwards; }
+.intro__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: clamp(28px, 3vw, 44px); opacity: 0; animation: fadeUp 1s 1.05s var(--ease) forwards; }
+.intro__photo { grid-column: 7 / 13; position: relative; overflow: hidden; background: var(--surface); min-height: 440px; }
+.intro__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; transform: scale(1.08); animation: heroIn 2.6s var(--ease) forwards; }
+.intro-wrap .tape { background: var(--ink); color: var(--cream); }
+
+@keyframes lineUp { to { transform: translateY(0); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes bob { 50% { transform: translateY(4px); } }
+
+/* ---------- TRAKA SA PORUKAMA ---------- */
+.tape { background: var(--bone); color: var(--ink); overflow: hidden; padding: 12px 0; }
+.tape__track { display: flex; width: max-content; animation: marquee 60s linear infinite; }
+.tape__item { font-family: var(--f-display); text-transform: uppercase; font-size: clamp(20px, 2.2vw, 30px); line-height: 1; white-space: nowrap; display: flex; align-items: center; }
+.tape__x { color: var(--red); margin-inline: .6em; font-family: var(--f-sans); font-weight: 900; font-size: .7em; }
+@keyframes marquee { to { transform: translateX(-50%); } }
+
+/* ---------- MANIFEST ---------- */
+.manifest__lead { font-size: clamp(36px, 5.4vw, 88px); line-height: 1.02; letter-spacing: -.015em; max-width: 15em; }
+.manifest__lead em { color: var(--accent); }
+.manifest__cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(24px, 4vw, 64px); margin-top: clamp(64px, 9vw, 130px); padding-top: 28px; border-top: 1px solid var(--line); }
+.manifest__cols h3 { margin-bottom: 12px; }
+.manifest__cols p { color: var(--muted); max-width: 30ch; }
+
+/* ---------- NASLOVI SEKCIJA ---------- */
+.chapter { padding-top: clamp(40px, 6vw, 80px); padding-bottom: clamp(24px, 4vw, 48px); }
+.chapter__row { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
+.chapter__title, .lookbook__title { font-size: clamp(76px, 14vw, 220px); }
+.chapter__desc { color: var(--muted); padding-bottom: .8em; }
+
+/* ---------- KOLEKCIJA ---------- */
+.design {
+  display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: clamp(16px, 3vw, 48px);
+  padding-block: clamp(56px, 8vw, 120px); border-top: 1px solid var(--line);
+}
+.design__text { grid-column: 1 / 6; align-self: center; }
+.design__media { grid-column: 6 / 13; }
+.design:nth-child(even) .design__text { grid-column: 8 / 13; grid-row: 1; }
+.design:nth-child(even) .design__media { grid-column: 1 / 8; grid-row: 1; }
+
+.design__num { color: var(--muted); padding-bottom: 18px; margin-bottom: 26px; border-bottom: 1px solid var(--line); }
+.design__quote { font-size: clamp(46px, 5.6vw, 92px); }
+.design__quote .line { display: block; overflow: hidden; }
+.design__quote .line > span { display: inline-block; transform: translateY(105%); transition: transform 1s var(--ease); }
+.design__quote .line:nth-child(2) > span { transition-delay: .08s; }
+.design__quote .line:nth-child(3) > span { transition-delay: .16s; }
+.design.in .design__quote .line > span { transform: none; }
+.design__quote .line:last-child { color: var(--accent); }
+.design__meaning { font-family: var(--f-serif); font-size: clamp(22px, 2vw, 28px); line-height: 1.25; margin-top: 28px; max-width: 24ch; }
+.design__meta { color: var(--muted); margin-top: 22px; }
+.design__actions { margin-top: 34px; }
+
+.viewer { position: relative; height: min(84vh, 900px); aspect-ratio: 4 / 5; max-width: 100%; overflow: hidden; background: var(--surface); margin-left: auto; cursor: zoom-in; }
+.design:nth-child(even) .viewer { margin-left: 0; margin-right: auto; }
+.viewer img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity .6s var(--ease), transform 1.4s var(--ease); }
+.viewer img.is-leaving { opacity: 0; }
+.viewer:hover img { transform: scale(1.025); }
+.viewer__count { position: absolute; z-index: 2; top: 14px; left: 14px; background: rgba(0,0,0,.55); color: #fff; padding: 6px 10px; backdrop-filter: blur(6px); }
+.thumbs { display: flex; gap: 8px; margin-top: 10px; justify-content: flex-end; overflow-x: auto; scrollbar-width: none; }
+.design:nth-child(even) .thumbs { justify-content: flex-start; }
+.thumbs::-webkit-scrollbar { display: none; }
+.thumb { flex: 0 0 auto; width: 62px; aspect-ratio: 2 / 3; padding: 0; border: 0; background: var(--surface); opacity: .5; transition: opacity .3s, outline-color .3s; outline: 1px solid transparent; outline-offset: 3px; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; }
+.thumb:hover { opacity: .85; }
+.thumb.is-active { opacity: 1; outline-color: var(--accent); }
+
+/* ---------- DUGMAD ---------- */
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 16px 24px; border-radius: 99px; border: 1px solid var(--fg);
+  background: var(--fg); color: var(--bg);
+  font-family: var(--f-mono); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; text-decoration: none;
+  transition: background .3s, color .3s, transform .3s var(--ease);
+}
+.btn:hover { background: var(--accent); border-color: var(--accent); color: var(--ink); transform: translateY(-2px); }
+.btn--light { background: transparent; color: var(--fg); }
+
+/* ---------- LOOKBOOK ---------- */
+.lookbook__head { margin-bottom: clamp(32px, 5vw, 64px); }
+.masonry { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-flow: dense; gap: 12px; }
+.shot { position: relative; display: block; width: 100%; margin: 0; padding: 0; border: 0; background: var(--surface); overflow: hidden; cursor: zoom-in; }
+.shot img { width: 100%; height: 100%; aspect-ratio: 2 / 3; object-fit: cover; transition: transform 1s var(--ease); }
+.shot.is-big { grid-column: span 2; grid-row: span 2; }
+.shot__cap { position: absolute; inset: auto 0 0 0; padding: 40px 14px 12px; text-align: left; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.75)); transform: translateY(100%); transition: transform .5s var(--ease); }
+.shot:hover img, .shot:focus-visible img { transform: scale(1.04); }
+.shot:hover .shot__cap, .shot:focus-visible .shot__cap { transform: none; }
+
+/* ---------- PORUČIVANJE ---------- */
+.order__title { font-size: clamp(64px, 9vw, 150px); }
+.steps { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(20px, 3vw, 40px); margin-top: clamp(56px, 8vw, 110px); }
+.steps li { border-top: 1px solid var(--line); padding-top: 22px; }
+.steps__n { display: block; font-size: clamp(72px, 7.5vw, 120px); color: transparent; -webkit-text-stroke: 1px var(--fg); margin-bottom: 18px; transition: color .4s, -webkit-text-stroke-color .4s; }
+.steps li:hover .steps__n { color: var(--accent); -webkit-text-stroke-color: var(--accent); }
+.steps h3 { font-family: var(--f-mono); font-size: 13px; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; }
+.steps p { color: var(--muted); }
+
+/* ---------- TVOJA REČENICA ---------- */
+.yourline__title { font-size: clamp(34px, 4.4vw, 68px); line-height: 1.04; max-width: 18em; }
+.yourline__title em { color: var(--muted); }
+.yourline__form { margin-top: clamp(40px, 6vw, 80px); }
+.yourline__form textarea {
+  width: 100%; resize: none; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--fg);
+  font-size: clamp(40px, 6.6vw, 112px); padding: 0 0 10px; outline: none; line-height: .95; transition: border-color .3s;
+}
+.yourline__form textarea::placeholder { color: var(--line); }
+.yourline__form textarea:focus { border-bottom-color: var(--accent); }
+.yourline__row { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 22px; color: var(--muted); }
+
+/* ---------- FAQ ---------- */
+.faq__grid { display: grid; grid-template-columns: 5fr 7fr; gap: 40px; }
+.faq__title { font-size: clamp(56px, 6.6vw, 112px); }
+.faq__list details { border-top: 1px solid var(--line); }
+.faq__list details:last-child { border-bottom: 1px solid var(--line); }
+.faq__list summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 26px 0; font-family: var(--f-serif); font-size: clamp(24px, 2.4vw, 34px); line-height: 1.15; }
+.faq__list summary::-webkit-details-marker { display: none; }
+.faq__list summary::after { content: '+'; font-family: var(--f-mono); font-size: 22px; transition: transform .4s var(--ease), color .3s; }
+.faq__list details[open] summary::after { transform: rotate(45deg); color: var(--accent); }
+.faq__list details p { color: var(--muted); padding: 0 0 28px; max-width: 52ch; }
+
+/* ---------- FOOTER ---------- */
+.footer { padding-bottom: 28px; }
+.footer.section--ruled > .wrap::before { margin-bottom: clamp(80px, 10vw, 140px); }
+.footer__wrap { container-type: inline-size; }
+.footer__top { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+.footer__claim { font-size: clamp(32px, 4vw, 60px); }
+/* Logo popunjava tačno širinu kontejnera */
+.footer__word { font-family: var(--f-sans); font-weight: 900; font-size: 35.1cqw; letter-spacing: -.075em; line-height: .78; margin: clamp(30px, 5vw, 60px) 0 clamp(20px, 3vw, 36px) -.02em; white-space: nowrap; }
+.footer__bottom { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; color: var(--muted); }
+
+/* ---------- LIGHTBOX ---------- */
+.lightbox { width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: rgba(8, 7, 6, .96); color: var(--cream); }
+.lightbox[open] { display: grid; grid-template-columns: 80px 1fr 80px; align-items: center; animation: fadeIn .35s var(--ease); }
+.lightbox::backdrop { background: transparent; }
+.lightbox figure { display: flex; flex-direction: column; align-items: center; gap: 14px; height: 100%; justify-content: center; padding: 64px 0 24px; }
+.lightbox img { max-height: calc(100dvh - 140px); max-width: 100%; object-fit: contain; }
+.lightbox figcaption { color: rgba(239,233,223,.7); text-align: center; }
+.lightbox__close { position: absolute; top: 20px; right: var(--gutter); background: none; border: 0; padding: 8px; }
+.lightbox__nav { background: none; border: 0; font-size: 28px; height: 100%; opacity: .7; transition: opacity .2s; }
+.lightbox__nav:hover { opacity: 1; }
+@keyframes fadeIn { from { opacity: 0; } }
+
+/* ---------- TOAST ---------- */
+.toast { position: fixed; z-index: 120; left: 50%; bottom: 24px; transform: translate(-50%, calc(100% + 40px)); visibility: hidden; background: var(--cream); color: var(--ink); padding: 14px 20px; border-radius: 99px; transition: transform .5s var(--ease), visibility 0s .5s; max-width: calc(100vw - 32px); text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,.3); }
+.toast.is-on { transform: translate(-50%, 0); visibility: visible; transition: transform .5s var(--ease), visibility 0s; }
+
+/* ---------- REVEAL ---------- */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity 1s var(--ease), transform 1s var(--ease); }
+.reveal.in { opacity: 1; transform: none; }
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 1024px) {
+  .nav { display: none; }
+  .steps { grid-template-columns: 1fr 1fr; }
+  .design__quote { font-size: clamp(44px, 7vw, 80px); }
+}
+
+@media (max-width: 760px) {
+  :root { --header-h: 64px; }
+  body { font-size: 16px; }
+  .logo { font-size: 24px; }
+
+  /* Hero: jedna fotografija preko cele širine, druga se pojavljuje preko nje */
+  .hero { grid-template-columns: 1fr; min-height: 480px; }
+
+  .trail { min-height: 520px; cursor: auto; }
+  .trail__img { width: clamp(130px, 40vw, 190px); }
+  .trail__hint { display: none; }
+  .trail__bottom { flex-direction: column; align-items: flex-start; gap: 18px; }
+
+  .intro { grid-template-columns: minmax(0, 1fr); row-gap: 28px; min-height: 0; padding-top: 20px; }
+  .intro__text, .intro__photo { grid-column: 1; }
+  .intro__photo { min-height: 0; aspect-ratio: 4 / 5; }
+  .hero__photo { position: absolute; inset: 0; }
+  .hero__photo--1 { z-index: 1; animation: photoCycle 9s 2s ease-in-out infinite; opacity: 0; }
+  @keyframes photoCycle { 0%, 38% { opacity: 0; } 50%, 88% { opacity: 1; } 100% { opacity: 0; } }
+  .hero__title { font-size: clamp(46px, 14.5cqw, 96px); }
+  .hero__scroll { display: none; }
+
+  .manifest__cols { grid-template-columns: 1fr; gap: 28px; }
+
+  .design { grid-template-columns: minmax(0, 1fr); row-gap: 28px; }
+  .design__text, .design:nth-child(even) .design__text { grid-column: 1; grid-row: 1; }
+  .design__media, .design:nth-child(even) .design__media { grid-column: 1; grid-row: 2; }
+  .viewer, .design:nth-child(even) .viewer { height: auto; width: 100%; margin: 0; }
+  .thumbs, .design:nth-child(even) .thumbs { justify-content: flex-start; }
+  .thumb { width: 54px; }
+
+  .masonry { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .shot__cap { display: none; }
+
+  .steps { grid-template-columns: 1fr; }
+  .faq__grid { grid-template-columns: 1fr; }
+
+  .lightbox[open] { grid-template-columns: 1fr; }
+  .lightbox__nav { position: absolute; bottom: 10px; height: auto; padding: 14px 22px; }
+  .lightbox__nav--prev { left: 8px; }
+  .lightbox__nav--next { right: 8px; }
+  .lightbox figure { padding: 64px 12px 70px; }
+  .lightbox img { max-height: calc(100dvh - 190px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  .hero__photo--1 { opacity: 1; }
+  .trail__img.still { opacity: 1; }
+  .grain { animation: none; }
+}
