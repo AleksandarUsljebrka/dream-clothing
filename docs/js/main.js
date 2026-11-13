@@ -27,6 +27,32 @@
   $$('.js-tape').forEach(t => { t.innerHTML = tapeItems + tapeItems + tapeItems + tapeItems; });
   $$('.js-ig-dm').forEach(a => { a.href = dmUrl; });
 
+  /* ---------- Hamburger meni (do 1024px) ---------- */
+  (() => {
+    const burger = $('.js-burger');
+    const menu = $('.js-menu');
+    if (!burger || !menu) return;
+    const setMenu = open => {
+      document.documentElement.classList.toggle('menu-open', open); // zaključa skrol stranice
+      menu.classList.toggle('is-open', open);
+      menu.inert = !open; // zatvoren meni ne može da dobije fokus ni klik
+      burger.setAttribute('aria-expanded', String(open));
+      burger.setAttribute('aria-label', open ? 'Zatvori meni' : 'Otvori meni');
+    };
+    burger.addEventListener('click', () => {
+      const open = !menu.classList.contains('is-open');
+      setMenu(open);
+      if (open) $('a', menu).focus({ preventScroll: true });
+    });
+    // Klik na stavku zatvori meni, a link odvede na sekciju
+    $$('a', menu).forEach(a => a.addEventListener('click', () => setMenu(false)));
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && menu.classList.contains('is-open')) { setMenu(false); burger.focus(); }
+    });
+    // Ako se ekran raširi preko 1024px dok je meni otvoren, zatvori ga
+    matchMedia('(min-width: 1025px)').addEventListener('change', e => { if (e.matches) setMenu(false); });
+  })();
+
   /* ---------- Hero: trag slika ---------- */
   (() => {
     const root = $('.js-trail');
@@ -104,12 +130,19 @@
     list.innerHTML = designs
       .filter(d => d.mood === mood)
       .map(d => {
-        const thumbs = d.photos > 1
-          ? `<div class="thumbs" role="group" aria-label="Fotografije dizajna">${Array.from({ length: d.photos }, (_, k) => `
-              <button type="button" class="thumb${k === 0 ? ' is-active' : ''}" data-n="${k + 1}" aria-label="Fotografija ${k + 1}">
-                <img src="${src(d.slug, k + 1, 640)}" alt="" loading="lazy">
-              </button>`).join('')}</div>`
-          : '';
+        const nums = Array.from({ length: d.photos }, (_, k) => k + 1);
+        const slides = nums.map(n => `
+              <figure class="slide">
+                <img src="${src(d.slug, n, 1280)}" srcset="${srcset(d.slug, n)}" sizes="(max-width: 760px) 86vw, 50vw" alt="${esc(alt(d, n))}" loading="lazy" draggable="false">
+              </figure>`).join('');
+        const ui = d.photos > 1 ? `
+            <div class="slider__ui">
+              <div class="slider__bars">${nums.map(n => `<button type="button" class="bar${n === 1 ? ' is-on' : ''}" aria-label="Fotografija ${n}"></button>`).join('')}</div>
+              <div class="slider__arrows">
+                <button type="button" class="slider__arrow js-prev" aria-label="Prethodna fotografija" disabled>←</button>
+                <button type="button" class="slider__arrow js-next" aria-label="Sledeća fotografija">→</button>
+              </div>
+            </div>` : '';
         return `
         <article class="design" data-slug="${d.slug}">
           <div class="design__text">            <h3 class="design__quote display">${d.lines.map(l => `<span class="line"><span>${esc(l)}</span></span>`).join('')}</h3>
@@ -120,43 +153,82 @@
             </div>
           </div>
           <div class="design__media">
-            <div class="viewer" data-n="1" role="button" tabindex="0" aria-label="Uvećaj fotografiju">
-              ${d.photos > 1 ? `<span class="viewer__count mono"><span class="js-cur">1</span> / ${d.photos}</span>` : ''}
-              <img src="${src(d.slug, 1, 1280)}" srcset="${srcset(d.slug, 1)}" sizes="(max-width: 760px) 100vw, 55vw" alt="${esc(alt(d, 1))}" loading="lazy">
+            <div class="slider">
+              <div class="slider__track" tabindex="0" role="region" aria-label="Fotografije: ${esc(quoteOf(d))}">${slides}
+              </div>${ui}
             </div>
-            ${thumbs}
           </div>
         </article>`;
       }).join('');
   });
 
-  // Promena glavne slike klikom na thumbnail
+  /* Slajder: slike stoje u nizu sa scroll-snap-om.
+     Telefon: prevlačenje prstom (radi sam browser). Računar: prevlačenje mišem, strelice, crtice, tastatura.
+     Klik bez prevlačenja otvara sliku preko celog ekrana. */
   $$('.design').forEach(el => {
     const d = designs.find(x => x.slug === el.dataset.slug);
-    const viewer = $('.viewer', el);
-    const show = n => {
-      if (+viewer.dataset.n === n) return;
-      const old = $('img', viewer);
-      const img = new Image();
-      img.src = src(d.slug, n, 1280);
-      img.srcset = srcset(d.slug, n);
-      img.sizes = old.sizes;
-      img.alt = alt(d, n);
-      img.style.opacity = '0';
-      const swap = () => {
-        viewer.appendChild(img);
-        requestAnimationFrame(() => { img.style.opacity = ''; old.classList.add('is-leaving'); });
-        setTimeout(() => old.remove(), 650);
-      };
-      img.decode ? img.decode().then(swap, swap) : (img.onload = swap);
-      viewer.dataset.n = n;
-      const cur = $('.js-cur', viewer); if (cur) cur.textContent = n;
-      $$('.thumb', el).forEach(t => t.classList.toggle('is-active', +t.dataset.n === n));
+    const track = $('.slider__track', el);
+    const slides = $$('.slide', track);
+    const bars = $$('.bar', el);
+    const prev = $('.js-prev', el), next = $('.js-next', el);
+    const step = () => (slides[1] ? slides[1].offsetLeft - slides[0].offsetLeft : track.clientWidth);
+    const current = () => Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / step())));
+    // instant: tastatura i isključene animacije pomeraju odmah, bez animacije
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    const go = (i, instant = false) => track.scrollTo({
+      left: Math.max(0, Math.min(slides.length - 1, i)) * step(),
+      behavior: instant || reduce.matches ? 'instant' : 'smooth'
+    });
+
+    let shown = -1;
+    const update = () => {
+      const i = current();
+      if (i === shown) return;
+      shown = i;
+      bars.forEach((b, k) => { b.classList.toggle('is-on', k <= i); b.setAttribute('aria-current', k === i ? 'true' : 'false'); });
+      if (prev) prev.disabled = i === 0;
+      if (next) next.disabled = i === slides.length - 1;
     };
-    $$('.thumb', el).forEach(t => t.addEventListener('click', () => show(+t.dataset.n)));
-    const open = () => openLightbox(photos.findIndex(p => p.design === d && p.n === +viewer.dataset.n));
-    viewer.addEventListener('click', open);
-    viewer.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+    track.addEventListener('scroll', () => requestAnimationFrame(update), { passive: true });
+    if (prev) prev.addEventListener('click', () => go(current() - 1));
+    if (next) next.addEventListener('click', () => go(current() + 1));
+    bars.forEach((b, k) => b.addEventListener('click', () => go(k)));
+    update();
+
+    // Prevlačenje mišem (dodir i trackpad već rade sami)
+    let drag = null, moved = false;
+    track.addEventListener('pointerdown', e => {
+      if (e.pointerType !== 'mouse' || e.button !== 0 || slides.length < 2) return;
+      drag = { x: e.clientX, left: track.scrollLeft, start: current(), t: performance.now() };
+      moved = false;
+    });
+    window.addEventListener('pointermove', e => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x;
+      if (!moved && Math.abs(dx) > 5) { moved = true; track.classList.add('is-dragging'); }
+      if (moved) track.scrollLeft = drag.left - dx;
+    });
+    window.addEventListener('pointerup', e => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x;
+      const { start, t } = drag;
+      drag = null;
+      if (!moved) return;
+      track.classList.remove('is-dragging');
+      // Prelazi na sledeću sliku ako je povučeno bar 60px ILI ako je potez bio brz (flick),
+      // pa je dovoljan i kratak, brz pokret
+      const velocity = Math.abs(dx) / Math.max(1, performance.now() - t);
+      const flick = Math.abs(dx) > 60 || velocity > 0.11;
+      go(flick ? start + (dx < 0 ? 1 : -1) : start);
+    });
+
+    const open = () => openLightbox(photos.findIndex(p => p.design === d && p.n === current() + 1));
+    track.addEventListener('click', () => { if (moved) { moved = false; return; } open(); });
+    track.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); open(); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); go(current() + 1, true); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(current() - 1, true); }
+    });
   });
 
   /* ---------- Toast + clipboard ---------- */

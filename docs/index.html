@@ -35,9 +35,30 @@
         <a href="#porucivanje">Poručivanje</a>
         <a href="#faq">Pitanja</a>
       </nav>
-      <a class="header__cta js-ig" href="#" target="_blank" rel="noopener">Piši nam <span aria-hidden="true">↗</span></a>
+      <div class="header__right">
+        <a class="header__cta js-ig" href="#" target="_blank" rel="noopener">Piši nam <span aria-hidden="true">↗</span></a>
+        <button type="button" class="burger js-burger" aria-label="Otvori meni" aria-expanded="false" aria-controls="menu">
+          <span></span><span></span>
+        </button>
+      </div>
     </div>
   </header>
+
+  <!-- Meni za manje ekrane (do 1024px), otvara se na hamburger -->
+  <nav class="menu js-menu" id="menu" aria-label="Meni" inert>
+    <div class="wrap menu__inner">
+      <ul class="menu__list">
+        <li><a href="#kolekcija">Kolekcija</a></li>
+        <li><a href="#galerija">Galerija</a></li>
+        <li><a href="#porucivanje">Poručivanje</a></li>
+        <li><a href="#faq">Pitanja</a></li>
+      </ul>
+      <div class="menu__foot">
+        <a class="btn btn--accent js-ig-dm" href="#" target="_blank" rel="noopener">Naruči na Instagramu <span aria-hidden="true">↗</span></a>
+        <p class="mono menu__note">Štampa po porudžbini — Srbija</p>
+      </div>
+    </div>
+  </nav>
 
   <main id="top">
     <!-- TRAG SLIKA: veliko DREAM, a iza njega fotografije prate miš -->
