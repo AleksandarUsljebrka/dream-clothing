@@ -68,8 +68,12 @@ button, .btn, .nav a, .logo, .header__cta, .menu__list a {
 }
 /* Reakcija na pritisak: dugme se malo smanji čim ga dodirneš ili klikneš */
 .btn:active, .header__cta:active, .slider__arrow:active:not(:disabled) { transform: scale(.97); }
-.shot:active { transform: scale(.985); }
+.gcard:active { transform: scale(.985); }
 h1, h2, h3, p, figure, ol { margin: 0; }
+/* Prelamanje: naslovi dobijaju ravnomerne redove, a tekst ne ostavlja jednu reč samu u poslednjem redu.
+   (Kratke reči kao „u", „i", „da", „se" main.js veže za sledeću reč nevidljivim razmakom.) */
+h1, h2, h3, .manifest__lead, .yourline__title { text-wrap: balance; }
+p, li, summary, figcaption { text-wrap: pretty; }
 ::selection { background: var(--accent); color: var(--ink); }
 
 /* Jedan kontejner za ceo sajt: ista širina i iste ivice za svaku sekciju */
@@ -98,7 +102,19 @@ h1, h2, h3, p, figure, ol { margin: 0; }
 }
 
 /* ---------- HEADER ---------- */
-.header { position: fixed; inset: 0 0 auto; z-index: 50; color: #fff; mix-blend-mode: difference; }
+/* Navbar ima svoju pozadinu u boji trenutne teme (svetla/tamna), blago providnu i zamućenu,
+   pa tekst sajta ne prolazi kroz njega. Boja se menja zajedno sa pozadinom stranice. */
+.header {
+  position: fixed; inset: 0 0 auto; z-index: 50;
+  color: var(--fg);
+  background: var(--bg);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  transition: background-color .9s var(--ease), color .9s var(--ease), border-color .9s var(--ease);
+}
+/* Dok je meni otvoren, navbar je taman kao meni */
+.menu-open .header { background: var(--ink); color: var(--cream); border-bottom-color: rgba(239, 233, 223, .14); }
 .header__inner { height: var(--header-h); display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .logo { font-family: var(--f-sans); font-weight: 900; font-size: 28px; letter-spacing: -.06em; text-decoration: none; line-height: 1; }
 .nav { display: flex; gap: clamp(16px, 2.4vw, 36px); }
@@ -233,7 +249,8 @@ html[data-hero="full"] [data-variant="full"] { display: block; }
   position: absolute; z-index: 3; left: var(--edge); right: var(--edge); bottom: clamp(28px, 6vh, 56px);
   display: flex; justify-content: space-between; align-items: flex-end; gap: 24px;
 }
-.trail__line { font-size: clamp(24px, 2.2vw, 30px); line-height: 1.1; max-width: 13em; }
+/* Prelom je ručno posle prve rečenice; nowrap da se druga rečenica ne lomi */
+.trail__line { font-size: clamp(22px, 2.2vw, 30px); line-height: 1.15; white-space: nowrap; }
 .btn.btn--accent { background: var(--red); border-color: var(--red); color: #fff; }
 
 /* ---------- INTRO (novi hero) ---------- */
@@ -278,7 +295,7 @@ html[data-hero="full"] [data-variant="full"] { display: block; }
 /* ---------- NASLOVI SEKCIJA ---------- */
 .chapter { padding-top: clamp(40px, 6vw, 80px); padding-bottom: clamp(24px, 4vw, 48px); }
 .chapter__row { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
-.chapter__title, .lookbook__title { font-size: clamp(76px, 14vw, 220px); }
+.chapter__title { font-size: clamp(76px, 14vw, 220px); }
 .chapter__desc { color: var(--muted); padding-bottom: .8em; }
 
 /* ---------- KOLEKCIJA ---------- */
@@ -341,18 +358,62 @@ html[data-hero="full"] [data-variant="full"] { display: block; }
 }
 .btn--light { background: transparent; color: var(--fg); }
 
-/* ---------- LOOKBOOK ---------- */
-.lookbook__head { margin-bottom: clamp(32px, 5vw, 64px); }
-.masonry { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-flow: dense; gap: 12px; }
-.shot { position: relative; display: block; width: 100%; margin: 0; padding: 0; border: 0; background: var(--surface); overflow: hidden; cursor: zoom-in; transition: transform .16s var(--ease-out); }
-.shot img { width: 100%; height: 100%; aspect-ratio: 2 / 3; object-fit: cover; transition: transform .6s var(--ease-out); }
-.shot.is-big { grid-column: span 2; grid-row: span 2; }
-.shot__cap { position: absolute; inset: auto 0 0 0; padding: 40px 14px 12px; text-align: left; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.75)); transform: translateY(100%); transition: transform .3s var(--ease-out); }
-.shot:focus-visible img { transform: scale(1.04); }
-.shot:focus-visible .shot__cap { transform: none; }
+/* ---------- GALERIJA ---------- */
+/* Cela sekcija staje u otprilike jedan ekran: naslov + dva reda od po 38vh (30vh na telefonu) */
+/* Visina reda: oko 38vh, ali najviše toliko da naslov i oba reda stanu ispod headera
+   (260px = razmaci + labela + naslov) */
+.gallery {
+  --gap: 16px;
+  --row-h: min(38vh, calc((100svh - var(--header-h) - 260px) / 2));
+  padding-block: clamp(24px, 4vh, 48px);
+}
+.gallery__label { margin-bottom: 8px; }
+.gallery__head { margin-bottom: clamp(14px, 2vh, 24px); }
+.gallery__title { font-size: clamp(48px, 6.5vw, 104px); }
+.gallery__rows { display: flex; flex-direction: column; gap: var(--gap); }
+
+/* Red je prozor u širini kontejnera; traka u njemu ima sadržaj dva puta (original + kopija),
+   pa pomeranje za tačno -50% pravi petlju bez šava */
+.gallery__row { overflow: hidden; }
+.gallery__track { display: flex; width: max-content; }
+.gallery__group { display: flex; gap: var(--gap); padding-right: var(--gap); }
+.gallery__row--left .gallery__track { animation: galleryLeft 45s linear infinite; }
+.gallery__row--right .gallery__track { animation: galleryRight 55s linear infinite; }
+@keyframes galleryLeft { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes galleryRight { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+
+/* Kartica: ista visina za sve, širina zavisi od oblika (2:3, 4:5, 1:1) */
+.gcard {
+  position: relative; flex: 0 0 auto; height: var(--row-h); aspect-ratio: var(--ar, 2 / 3);
+  margin: 0; padding: 0; border: 0; overflow: hidden; background: var(--surface); cursor: zoom-in;
+  transition: transform .16s var(--ease-out);
+}
+.gcard img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--ease-out); }
+.gcard__cap {
+  position: absolute; inset: auto 0 0 0; padding: 40px 14px 12px; text-align: left; color: #fff;
+  background: linear-gradient(transparent, rgba(0, 0, 0, .75));
+  transform: translateY(100%); transition: transform .3s var(--ease-out);
+}
+.gcard:focus-visible { outline: 1px solid var(--accent); outline-offset: -1px; }
+.gcard:focus-visible img { transform: scale(1.04); }
+.gcard:focus-visible .gcard__cap { transform: none; }
+
+/* Uređaji na dodir i isključene animacije: trake ne idu same, nego se prevlače prstom
+   (horizontalni skrol sa „hvatanjem" kartica). Kopija trake se tada sakrije. */
+@media (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .gallery__row { overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .gallery__row::-webkit-scrollbar { display: none; }
+  .gallery__row--left .gallery__track, .gallery__row--right .gallery__track { animation: none; }
+  .gallery__group[aria-hidden="true"] { display: none; }
+  .gallery__group { padding-right: 0; }
+  .gcard { scroll-snap-align: start; }
+}
 
 /* ---------- PORUČIVANJE ---------- */
-.order__title { font-size: clamp(64px, 9vw, 150px); }
+/* Naslovi na srpskom u više redova: u Anton fontu vrh kvačice (Č, Š, Ž, Ć) je na 1,11 visine slova,
+   a velika slova su visoka 0,86. Zato red mora biti visok bar ~1,18, inače kvačica udari u red iznad.
+   Engleske poruke sa majica nemaju kvačice, pa one ostaju zbijene (.9). */
+.order__title { font-size: clamp(64px, 9vw, 150px); line-height: 1.18; }
 .steps { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(20px, 3vw, 40px); margin-top: clamp(56px, 8vw, 110px); }
 .steps li { border-top: 1px solid var(--line); padding-top: 22px; }
 .steps__n { display: block; font-size: clamp(72px, 7.5vw, 120px); color: transparent; -webkit-text-stroke: 1px var(--fg); margin-bottom: 18px; transition: color .25s ease, -webkit-text-stroke-color .25s ease; }
@@ -365,15 +426,18 @@ html[data-hero="full"] [data-variant="full"] { display: block; }
 .yourline__form { margin-top: clamp(40px, 6vw, 80px); }
 .yourline__form textarea {
   width: 100%; resize: none; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--fg);
-  font-size: clamp(40px, 6.6vw, 112px); padding: 0 0 10px; outline: none; line-height: .95; transition: border-color .3s;
+  font-size: clamp(40px, 6.6vw, 112px); padding: 0 0 10px; outline: none; line-height: 1.18; transition: border-color .3s;
 }
 .yourline__form textarea::placeholder { color: var(--line); }
 .yourline__form textarea:focus { border-bottom-color: var(--accent); }
 .yourline__row { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 22px; color: var(--muted); }
+.yourline__next { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--line); }
+.yourline__next[hidden] { display: none; }
+.yourline__msg { max-width: 40ch; }
 
 /* ---------- FAQ ---------- */
 .faq__grid { display: grid; grid-template-columns: 5fr 7fr; gap: 40px; }
-.faq__title { font-size: clamp(56px, 6.6vw, 112px); }
+.faq__title { font-size: clamp(56px, 6.6vw, 112px); line-height: 1.18; }
 .faq__list details { border-top: 1px solid var(--line); }
 .faq__list details:last-child { border-bottom: 1px solid var(--line); }
 .faq__list summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 26px 0; font-family: var(--f-serif); font-size: clamp(24px, 2.4vw, 34px); line-height: 1.15; }
@@ -417,13 +481,14 @@ html[data-hero="full"] [data-variant="full"] { display: block; }
    Na telefonu reakciju daje :active (pritisak). */
 @media (hover: hover) and (pointer: fine) {
   .nav a:hover::after { transform: scaleX(1); transform-origin: left; }
-  .header__cta:hover { background: #fff; color: #000; }
+  .header__cta:hover { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .menu-open .header__cta:hover { background: var(--cream); color: var(--ink); }
   .btn:hover { background: var(--accent); border-color: var(--accent); color: var(--ink); }
   .btn.btn--accent:hover { background: var(--cream); border-color: var(--cream); color: var(--ink); }
   .bar:hover::before { background: var(--accent); }
   .slider__arrow:hover:not(:disabled) { background: var(--fg); color: var(--bg); border-color: var(--fg); }
-  .shot:hover img { transform: scale(1.04); }
-  .shot:hover .shot__cap { transform: none; }
+  .gcard:hover img { transform: scale(1.04); }
+  .gcard:hover .gcard__cap { transform: none; }
   .steps li:hover .steps__n { color: var(--accent); -webkit-text-stroke-color: var(--accent); }
   .lightbox__nav:hover { opacity: 1; }
   .menu__list a:hover { color: var(--red); }
@@ -473,8 +538,7 @@ html[data-hero="full"] [data-variant="full"] { display: block; }
   .slide:only-child { flex-basis: 100%; }
   .slider__arrows { display: none; }
 
-  .masonry { grid-template-columns: 1fr 1fr; gap: 8px; }
-  .shot__cap { display: none; }
+  .gallery { --row-h: min(30vh, calc((100svh - var(--header-h) - 200px) / 2)); --gap: 12px; }
 
   .steps { grid-template-columns: 1fr; }
   .faq__grid { grid-template-columns: 1fr; }
@@ -497,12 +561,15 @@ html[data-hero="full"] [data-variant="full"] { display: block; }
   .trail__img.still { opacity: 1; }
   .reveal { transform: none; transition: opacity .4s ease; }
   .design__quote .line > span { transform: none; transition: none; }
-  .shot img, .shot__cap, .nav a::after, .faq__list summary::after { transition: none; }
+  .gcard img, .gcard__cap, .nav a::after, .faq__list summary::after { transition: none; }
   .toast, .toast.is-on { transition: visibility 0s; }
-  .btn:active, .header__cta:active, .slider__arrow:active, .shot:active { transform: none; }
+  .btn:active, .header__cta:active, .slider__arrow:active, .gcard:active { transform: none; }
   /* Meni: samo se pojavi bledeći, bez zavese i bez pomeranja stavki */
   .menu { clip-path: none; opacity: 0; transition: opacity .2s ease, visibility 0s .2s; }
   .menu.is-open { opacity: 1; transition: opacity .2s ease, visibility 0s; }
   .menu__list a, .menu.is-open .menu__list a { transform: none; transition: opacity .2s ease, color .2s ease; transition-delay: 0s; }
   .burger span { transition: none; }
 }
+
+/* Grupa reči koja se ne lomi (npr. „štampa po porudžbini") */
+.nb { white-space: nowrap; }

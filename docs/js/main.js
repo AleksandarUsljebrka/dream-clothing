@@ -1,6 +1,7 @@
 (() => {
   const { instagram, designs } = window.DREAM;
-  const dmUrl = `https://ig.me/m/${instagram}`;
+  // Svi Instagram linkovi vode na profil. Kratki DM link (ig.me) se na nekim mrežama uopšte ne otvara,
+  // a instagram.com radi svuda i na telefonu otvara aplikaciju, odakle je jedan dodir do poruke.
   const igUrl = `https://www.instagram.com/${instagram}/`;
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -10,7 +11,7 @@
   const src = (slug, n, w) => `img/${slug}-${n}-${w}.webp`;
   const srcset = (slug, n) => `${src(slug, n, 640)} 640w, ${src(slug, n, 1280)} 1280w`;
 
-  // Sve fotografije u jednom nizu (za lookbook i lightbox)
+  // Sve fotografije svih majica (kolekcija ih koristi za lightbox)
   const photos = designs.flatMap(d =>
     Array.from({ length: d.photos }, (_, i) => ({ design: d, n: i + 1 }))
   );
@@ -18,14 +19,14 @@
 
   /* ---------- Linkovi ka Instagramu ---------- */
   $$('.js-ig').forEach(a => {
-    a.href = a.closest('.header') ? dmUrl : igUrl;
+    a.href = igUrl;
   });
   $('.js-year').textContent = new Date().getFullYear();
 
   /* ---------- Traka sa porukama ---------- */
   const tapeItems = designs.map(d => `<span class="tape__item">${esc(quoteOf(d))}<span class="tape__x">✕</span></span>`).join('');
   $$('.js-tape').forEach(t => { t.innerHTML = tapeItems + tapeItems + tapeItems + tapeItems; });
-  $$('.js-ig-dm').forEach(a => { a.href = dmUrl; });
+  $$('.js-ig-dm').forEach(a => { a.href = igUrl; });
 
   /* ---------- Hamburger meni (do 1024px) ---------- */
   (() => {
@@ -62,8 +63,10 @@
     // Po dve fotografije iz svakog dizajna, izmešane da se iste majice ne nižu jedna za drugom
     const picks = [];
     for (let n = 1; n <= 2; n++) designs.forEach(d => { if (n <= d.photos) picks.push(src(d.slug, n, 640)); });
-    const imgs = picks.map(s => {
+    const imgs = picks.map((s, i) => {
       const img = new Image();
+      // Prve 4 slike imaju prednost pri učitavanju, da trag krene odmah po otvaranju stranice
+      if (i < 4) img.fetchPriority = 'high';
       img.src = s; img.alt = ''; img.className = 'trail__img'; img.decoding = 'async';
       layer.appendChild(img);
       return img;
@@ -81,17 +84,27 @@
       return;
     }
 
-    let k = 0, z = 1, last = null, lastMove = 0, lastSpawn = 0, t = 0, raf = 0;
+    // -Infinity: niko još nije pomerio miš i nijedna slika nije iskočila, pa trag kreće odmah
+    let k = 0, z = 1, last = null, lastMove = -Infinity, lastSpawn = -Infinity, t = 0, raf = 0;
+    const touch = matchMedia('(pointer: coarse)').matches;
+    // 1,3 sekunde pauze posle otvaranja stranice: prvo se pojavi natpis DREAM, pa tek onda slike
+    const autoStartAt = performance.now() + 1300;
     // Nova slika iskače tek kad se miš pomeri dovoljno daleko (gap)
     // i kad prođe dovoljno vremena od prethodne (minDelay), da ih ne bude previše odjednom
     const spawn = (x, y, minDelay) => {
       const now = performance.now();
-      const gap = Math.max(150, Math.min(280, root.clientWidth * 0.16));
+      const gap = Math.max(touch ? 110 : 150, Math.min(280, root.clientWidth * 0.16));
       if (last && Math.hypot(x - last.x, y - last.y) < gap) return;
       if (now - lastSpawn < minDelay) return;
+      // Sledeća slika koja je već učitana (prazan okvir nikad ne iskače)
+      let el = null;
+      for (let s = 0; s < imgs.length; s++) {
+        const c = imgs[(k + s) % imgs.length];
+        if (c.complete && c.naturalWidth) { el = c; k += s + 1; break; }
+      }
+      if (!el) return;
       last = { x, y };
       lastSpawn = now;
-      const el = imgs[k++ % imgs.length];
       const w = el.offsetWidth || 200, h = el.offsetHeight || 300;
       el.style.left = `${x - w / 2}px`;
       el.style.top = `${y - h / 2}px`;
@@ -112,10 +125,12 @@
     // Kad miš miruje (ili na telefonu), slike same idu po talasastoj putanji
     const tick = () => {
       raf = requestAnimationFrame(tick);
+      if (performance.now() < autoStartAt) return;
       if (performance.now() - lastMove < 2500) return;
       t += 0.006;
       const w = root.clientWidth, h = root.clientHeight;
-      spawn(w * (0.5 + 0.36 * Math.sin(t * 1.3)), h * (0.5 + 0.3 * Math.sin(t * 2.1 + 0.6)), 700);
+      // Na telefonu (nema miša) slike se smenjuju malo češće
+      spawn(w * (0.5 + 0.36 * Math.sin(t * 1.3)), h * (0.5 + 0.3 * Math.sin(t * 2.1 + 0.6)), touch ? 550 : 700);
     };
 
     // Animacija radi samo dok je hero na ekranu
@@ -147,9 +162,9 @@
         <article class="design" data-slug="${d.slug}">
           <div class="design__text">            <h3 class="design__quote display">${d.lines.map(l => `<span class="line"><span>${esc(l)}</span></span>`).join('')}</h3>
             <p class="design__meaning">${esc(d.meaning)}</p>
-            <p class="design__meta mono">Crna majica — beli print — štampa po porudžbini</p>
+            <p class="design__meta mono"><span class="nb">Crna majica</span> - <span class="nb">beli print</span> - <span class="nb">štampa po porudžbini</span></p>
             <div class="design__actions">
-              <a class="btn js-want" href="${dmUrl}" target="_blank" rel="noopener" data-quote="${esc(quoteOf(d))}">Naruči <span aria-hidden="true">↗</span></a>
+              <a class="btn js-want" href="${igUrl}" target="_blank" rel="noopener" data-quote="${esc(quoteOf(d))}">Naruči <span aria-hidden="true">↗</span></a>
             </div>
           </div>
           <div class="design__media">
@@ -222,7 +237,8 @@
       go(flick ? start + (dx < 0 ? 1 : -1) : start);
     });
 
-    const open = () => openLightbox(photos.findIndex(p => p.design === d && p.n === current() + 1));
+    const designPhotos = photos.filter(p => p.design === d);
+    const open = () => openLightbox(designPhotos, current());
     track.addEventListener('click', () => { if (moved) { moved = false; return; } open(); });
     track.addEventListener('keydown', e => {
       if (e.key === 'Enter') { e.preventDefault(); open(); }
@@ -245,63 +261,82 @@
   };
 
   $$('.js-want').forEach(a => a.addEventListener('click', async () => {
-    const ok = await copy(`Zdravo! Zanima me majica „${a.dataset.quote}". Veličina: `);
-    if (ok) say('Poruka je kopirana — samo je nalepi u DM');
+    const ok = await copy(`Zdravo, zanima me majica „${a.dataset.quote}". Veličina: `);
+    if (ok) say('Poruka je kopirana. Na Instagramu otvori poruku i nalepi je.');
   }));
 
-  /* ---------- Lookbook ---------- */
-  const book = $('.js-lookbook');
-  // Redosled u arhivi: dizajni naizmenično dan/noć, pa po jedna fotografija iz svakog,
-  // da dve slike iste majice ne stoje jedna do druge
-  const day = designs.filter(d => d.mood === 'day');
-  const night = designs.filter(d => d.mood === 'night');
-  const mixed = [];
-  for (let i = 0; i < Math.max(day.length, night.length); i++) {
-    if (day[i]) mixed.push(day[i]);
-    if (night[i]) mixed.push(night[i]);
-  }
-  const order = [];
-  const maxPhotos = Math.max(...designs.map(d => d.photos));
-  for (let n = 1; n <= maxPhotos; n++) {
-    mixed.forEach(d => {
-      if (n <= d.photos) order.push(photos.findIndex(p => p.design === d && p.n === n));
-    });
-  }
-  book.innerHTML = order.map((i, k) => {
-    const p = photos[i];
-    return `<button type="button" class="shot${k % 9 === 0 ? ' is-big' : ''}" data-i="${i}" data-mood="${p.design.mood}" aria-label="Uvećaj: ${esc(quoteOf(p.design))}">
-      <img src="${src(p.design.slug, p.n, 640)}" srcset="${srcset(p.design.slug, p.n)}" sizes="(max-width: 760px) 50vw, 25vw" alt="${esc(alt(p.design, p.n))}" loading="lazy">
-      <span class="shot__cap mono">${esc(quoteOf(p.design))}</span>
-    </button>`;
-  }).join('');
-  $('.js-count-all').textContent = photos.length;
   $('.js-design-count').textContent = designs.length;
 
-  book.addEventListener('click', e => {
-    const s = e.target.closest('.shot');
-    if (s) openLightbox(+s.dataset.i);
+  /* ---------- Galerija: dve trake ---------- */
+  const bySlug = Object.fromEntries(designs.map(d => [d.slug, d]));
+  // 12 fotografija galerije, redom: prvo gornji red, pa donji. Lightbox iz galerije ide samo kroz njih.
+  const galleryPhotos = ['day', 'night'].flatMap(row =>
+    window.DREAM.gallery[row].map(g => ({ ...g, design: bySlug[g.slug], row }))
+  );
+
+  // Širina kartice = visina reda × oblik. Po tome browser bira dovoljno veliku sliku (640 ili 1280).
+  const arNum = ar => { const [w, h] = ar.split('/').map(Number); return w / h; };
+  const card = (p, i, copy) => `
+    <button type="button" class="gcard" style="--ar: ${p.ar}" data-i="${i}"${copy ? ' tabindex="-1"' : ''}
+      aria-label="Otvori fotografiju: ${esc(quoteOf(p.design))}">
+      <img src="${src(p.slug, p.n, 640)}" srcset="${srcset(p.slug, p.n)}"
+        sizes="(max-width: 760px) calc(30vh * ${arNum(p.ar).toFixed(3)}), calc(38vh * ${arNum(p.ar).toFixed(3)})"
+        alt="${copy ? '' : esc(alt(p.design, p.n))}" style="object-position: ${p.pos}" loading="lazy" draggable="false">
+      <span class="gcard__cap mono">${esc(quoteOf(p.design))}</span>
+    </button>`;
+
+  $$('.js-gallery-row').forEach(row => {
+    const items = galleryPhotos.map((p, i) => ({ p, i })).filter(({ p }) => p.row === row.dataset.row);
+    const group = copy => `<div class="gallery__group"${copy ? ' aria-hidden="true"' : ''}>${items.map(({ p, i }) => card(p, i, copy)).join('')}</div>`;
+    // Original + kopija: kopija služi samo da petlja nema šav, pa je skrivena od čitača ekrana i tastature
+    row.innerHTML = `<div class="gallery__track">${group(false)}${group(true)}</div>`;
+
+    // Miš preko reda: traka uspori na 25% brzine, postepeno (bez naglog zaustavljanja)
+    const track = $('.gallery__track', row);
+    let raf = 0;
+    const easeTo = target => {
+      const anim = track.getAnimations()[0];
+      if (!anim) return; // nema animacije (dodir ili isključene animacije)
+      cancelAnimationFrame(raf);
+      const from = anim.playbackRate, t0 = performance.now(), dur = 600;
+      const tick = now => {
+        const k = Math.min(1, (now - t0) / dur);
+        const eased = 1 - Math.pow(1 - k, 3); // ease-out
+        anim.updatePlaybackRate(from + (target - from) * eased);
+        if (k < 1) raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    };
+    row.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') easeTo(0.25); });
+    row.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') easeTo(1); });
+
+    row.addEventListener('click', e => {
+      const c = e.target.closest('.gcard');
+      if (c) openLightbox(galleryPhotos, +c.dataset.i);
+    });
   });
 
-  /* ---------- Lightbox ---------- */
+  /* ---------- Lightbox ----------
+     openLightbox(lista, indeks): strelice idu samo kroz datu listu
+     (galerija = njenih 12 fotografija, kolekcija = fotografije te majice) */
   const lb = $('.js-lightbox');
   const lbImg = $('.js-lb-img');
   const lbCap = $('.js-lb-cap');
-  let lbIndex = 0;
-  // Strelice u pregledu idu redom kao slike u lookbooku
+  let lbList = [], lbIndex = 0;
   function renderLb() {
-    const p = photos[lbIndex];
+    const p = lbList[lbIndex];
     lbImg.src = src(p.design.slug, p.n, 1280);
     lbImg.alt = alt(p.design, p.n);
     lbCap.textContent = quoteOf(p.design);
   }
-  function openLightbox(i) {
+  function openLightbox(list, i) {
+    lbList = list;
     lbIndex = i;
     renderLb();
     if (!lb.open) lb.showModal();
   }
   const step = dir => {
-    const pos = order.indexOf(lbIndex);
-    lbIndex = order[(pos + dir + order.length) % order.length];
+    lbIndex = (lbIndex + dir + lbList.length) % lbList.length;
     renderLb();
   };
   $('.js-lb-prev').addEventListener('click', () => step(-1));
@@ -326,17 +361,59 @@
   const ta = $('#line');
   const count = $('.js-line-count');
   ta.addEventListener('input', () => { count.textContent = `${ta.value.length} / 60`; });
+  // Dva koraka: 1) kopiraj rečenicu i reci to na sajtu, 2) korisnik sam otvori Instagram i nalepi je.
+  // Instagram ne dozvoljava da sajt unapred upiše tekst u poruku, pa nalepljivanje mora da uradi korisnik.
+  const next = $('.js-line-next');
+  const msg = $('.js-line-msg');
   form.addEventListener('submit', async e => {
     e.preventDefault();
     const line = ta.value.trim();
-    if (!line) { ta.focus(); say('Prvo upiši svoju rečenicu'); return; }
-    // Kopiranje krece dok je stranica jos u fokusu, pa se odmah otvara DM (u okviru klika, da ga browser ne blokira)
-    const copying = copy(`Predlog za novu Dream majicu: „${line}"`);
-    const win = window.open(dmUrl, '_blank');
-    if (win) win.opener = null;
-    const ok = await copying;
-    say(ok ? 'Kopirano — nalepi u Instagram poruku' : 'Otvori DM i pošalji nam svoju rečenicu');
+    if (!line) { ta.focus(); say('Prvo upiši svoju rečenicu.'); return; }
+    const text = `Predlog za novu Dream majicu: „${line}"`;
+    const ok = await copy(text);
+    if (ok) {
+      msg.textContent = 'Kopirano. Otvori Instagram, klikni na poruku i nalepi rečenicu.';
+    } else {
+      // Kopiranje nije dozvoljeno (stariji browser ili podešavanja): označi tekst da ga korisnik kopira sam
+      ta.focus(); ta.select();
+      msg.textContent = 'Nismo uspeli da kopiramo. Rečenica je označena, kopiraj je pa otvori Instagram.';
+    }
+    next.hidden = false;
   });
+  // Kad se rečenica promeni, drugi korak nestaje dok se ponovo ne kopira
+  ta.addEventListener('input', () => { next.hidden = true; });
+
+  /* ---------- Prelamanje srpskog teksta ----------
+     Kratke reči (u, i, a, s, da, se, ti, na...) ne ostaju same na kraju reda:
+     vežu se za sledeću reč nevidljivim razmakom (non-breaking space).
+     Poruke sa majica su na engleskom i ne diraju se. */
+  (() => {
+    const short = /(^|[\s(„])(a|i|o|u|s|k|da|se|ti|je|na|za|po|od|do|iz|sa|ne|ni|mi|ih|kad|što) (?=\S)/gi;
+    const skip = '.design__quote, .tape, .gcard__cap, .trail__word, .footer__claim, textarea, script';
+    $$('p, h1, h2, h3, summary, li, .chapter__desc').forEach(el => {
+      if (el.closest(skip)) return;
+      const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      let n;
+      while ((n = tw.nextNode())) {
+        if (n.parentElement.closest(skip)) continue;
+        // dva prolaza, za nizove kratkih reči („i ne skreći")
+        n.data = n.data.replace(short, '$1$2 ').replace(short, '$1$2 ');
+      }
+    });
+    // Poslednje dve reči pasusa idu zajedno, da jedna reč nikad ne ostane sama u poslednjem redu
+    $$('p, summary, h2.serif').forEach(el => {
+      if (el.closest(skip)) return;
+      const texts = [];
+      const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      let n;
+      while ((n = tw.nextNode())) if (n.data.trim()) texts.push(n);
+      const last = texts[texts.length - 1];
+      if (!last) return;
+      const trimmed = last.data.replace(/\s+$/, '');
+      const i = trimmed.lastIndexOf(' ');
+      if (i > 0 && trimmed.length - i < 18) last.data = trimmed.slice(0, i) + ' ' + trimmed.slice(i + 1) + last.data.slice(trimmed.length);
+    });
+  })();
 
   /* ---------- Dan → Noć: boja pozadine prati sekciju ---------- */
   const themed = $$('[data-theme]').filter(el => el !== document.body);

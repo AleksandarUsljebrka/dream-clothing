@@ -52,5 +52,29 @@ window.DREAM = {
       meaning: 'Strah će uvek imati nešto da kaže. Ti gledaj u cilj.',
       photos: 5
     }
-  ]
+  ],
+
+  /* Galerija: dve trake po 7 fotografija.
+     slug + n = koja fotografija, ar = oblik kartice (širina / visina), pos = koji deo slike ostaje vidljiv.
+     Iste majice su razmaknute, da dve slike istog printa ne stoje jedna do druge. */
+  gallery: {
+    day: [ // gornji red, ide ulevo
+      { slug: 'overthinking', n: 6, ar: '4 / 5', pos: '50% 50%' },
+      { slug: 'dream-big', n: 2, ar: '2 / 3', pos: '50% 40%' },
+      { slug: 'overthinking', n: 4, ar: '1 / 1', pos: '50% 60%' },
+      { slug: 'dont-overshare', n: 2, ar: '2 / 3', pos: '50% 40%' },
+      { slug: 'overthinking', n: 2, ar: '1 / 1', pos: '50% 40%' },
+      { slug: 'dream-big', n: 3, ar: '2 / 3', pos: '50% 50%' },
+      { slug: 'stay-humble', n: 1, ar: '4 / 5', pos: '50% 50%' }
+    ],
+    night: [ // donji red, ide udesno
+      { slug: 'push-beyond', n: 2, ar: '1 / 1', pos: '50% 45%' },
+      { slug: 'nothing-changes', n: 2, ar: '2 / 3', pos: '50% 50%' },
+      { slug: 'focus', n: 3, ar: '4 / 5', pos: '50% 40%' },
+      { slug: 'nothing-changes', n: 6, ar: '2 / 3', pos: '50% 50%' },
+      { slug: 'push-beyond', n: 3, ar: '4 / 5', pos: '50% 40%' },
+      { slug: 'nothing-changes', n: 4, ar: '1 / 1', pos: '50% 45%' },
+      { slug: 'focus', n: 4, ar: '4 / 5', pos: '50% 40%' }
+    ]
+  }
 };

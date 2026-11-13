@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dream Clothing — Reči koje nosiš</title>
-  <meta name="description" content="Dream Clothing — crne majice sa porukama. Štampa po porudžbini, iz Srbije. Find your personal style.">
-  <meta property="og:title" content="Dream Clothing — Reči koje nosiš">
+  <title>Dream Clothing - Reči koje nosiš</title>
+  <meta name="description" content="Dream Clothing - crne majice sa porukama. Štampa po porudžbini, iz Srbije. Find your personal style.">
+  <meta property="og:title" content="Dream Clothing - Reči koje nosiš">
   <meta property="og:description" content="Crne majice sa porukama. Štampa po porudžbini, iz Srbije.">
   <meta property="og:image" content="img/og.jpg">
   <meta name="theme-color" content="#0b0a09">
@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <!-- ?v= je verzija: kad menjaš CSS ili JS, povećaj broj, da browser ne koristi staru kopiju iz keša -->
-  <link rel="stylesheet" href="css/style.css?v=4">
+  <link rel="stylesheet" href="css/style.css?v=16">
   <!-- Privremeno, za poređenje hero varijanti: ?hero=split (Dream big slika) ili ?hero=full (preko celog ekrana).
        Bez parametra se prikazuje trag slika. -->
   <script>
@@ -29,7 +29,7 @@
 
   <header class="header">
     <div class="wrap header__inner">
-      <a href="#top" class="logo" aria-label="Dream — na vrh">dream</a>
+      <a href="#top" class="logo" aria-label="Dream, na vrh">dream</a>
       <nav class="nav" aria-label="Glavna navigacija">
         <a href="#kolekcija">Kolekcija</a>
         <a href="#galerija">Galerija</a>
@@ -56,7 +56,7 @@
       </ul>
       <div class="menu__foot">
         <a class="btn btn--accent js-ig-dm" href="#" target="_blank" rel="noopener">Naruči na Instagramu <span aria-hidden="true">↗</span></a>
-        <p class="mono menu__note">Štampa po porudžbini — Srbija</p>
+        <p class="mono menu__note">Štampa po porudžbini - Srbija</p>
       </div>
     </div>
   </nav>
@@ -68,7 +68,7 @@
         <div class="trail__imgs js-trail-imgs" aria-hidden="true"></div>
         <h1 class="trail__word display" aria-label="Dream"><span>D</span><span>R</span><span>E</span><span>A</span><span>M</span></h1>
         <div class="trail__bottom">
-          <p class="trail__line serif"><em>Majice sa porukom. Štampamo ih tek kad ih poručiš.</em></p>          <a class="btn btn--accent js-ig-dm" href="#" target="_blank" rel="noopener">Naruči na Instagramu <span aria-hidden="true">↗</span></a>
+          <p class="trail__line serif"><em>Majice sa porukom.<br>Štampamo ih tek kad ih poručiš.</em></p>          <a class="btn btn--accent js-ig-dm" href="#" target="_blank" rel="noopener">Naruči na Instagramu <span aria-hidden="true">↗</span></a>
         </div>
       </div>
       <div class="wrap">
@@ -82,7 +82,7 @@
     <section class="intro-wrap" data-variant="split" data-theme="day" aria-label="Uvod">
       <div class="wrap intro">
         <div class="intro__text">
-          <p class="mono intro__kicker">Dream Clothing — Štampa po porudžbini — Srbija</p>
+          <p class="mono intro__kicker">Dream Clothing - Štampa po porudžbini - Srbija</p>
           <h1 class="intro__title display">
             <span class="line"><span>Dream big.</span></span>
             <span class="line"><span>Work hard.</span></span>
@@ -115,7 +115,7 @@
         </figure>
 
         <div class="hero__content">
-          <p class="mono hero__kicker">Dream Clothing — Štampa po porudžbini — Srbija</p>
+          <p class="mono hero__kicker">Dream Clothing - Štampa po porudžbini - Srbija</p>
           <h1 class="hero__title display">
             <span class="line"><span>Dream big.</span></span>
             <span class="line"><span>Work hard.</span></span>
@@ -169,15 +169,17 @@
       <div class="wrap js-designs" data-mood="night" data-theme="night"></div>
     </section>
 
-    <!-- GALERIJA -->
-    <section id="galerija" class="section lookbook" data-theme="night">
+    <!-- GALERIJA: dve trake koje se kreću u suprotnim smerovima. Kartice puni main.js iz data.js (gallery). -->
+    <section id="galerija" class="gallery" data-theme="night">
       <div class="wrap">
-        <p class="mono label reveal">Galerija</p>
-        <div class="chapter__row lookbook__head">
-          <h2 class="display lookbook__title reveal">Arhiva</h2>
-          <p class="chapter__desc mono reveal"><span class="js-count-all"></span> fotografija</p>
+        <p class="mono label gallery__label">Galerija</p>
+        <div class="chapter__row gallery__head">
+          <h2 class="display gallery__title">Arhiva</h2>
         </div>
-        <div class="masonry js-lookbook"></div>
+        <div class="gallery__rows">
+          <div class="gallery__row gallery__row--left js-gallery-row" data-row="day" role="region" aria-label="Dnevne fotografije"></div>
+          <div class="gallery__row gallery__row--right js-gallery-row" data-row="night" role="region" aria-label="Noćne fotografije"></div>
+        </div>
       </div>
     </section>
 
@@ -205,7 +207,13 @@
           <textarea id="line" class="display" rows="2" maxlength="60" placeholder="Ovde ide tvoja poruka"></textarea>
           <div class="yourline__row">
             <span class="mono js-line-count">0 / 60</span>
-            <button type="submit" class="btn">Kopiraj i pošalji u DM <span aria-hidden="true">↗</span></button>
+            <button type="submit" class="btn">Kopiraj rečenicu</button>
+          </div>
+          <!-- Drugi korak: pojavi se tek kad je rečenica kopirana. Instagram ne dozvoljava da sajt sam upiše tekst u poruku,
+               pa korisnik otvara razgovor i nalepi rečenicu. -->
+          <div class="yourline__next js-line-next" hidden>
+            <p class="yourline__msg js-line-msg" role="status"></p>
+            <a class="btn btn--accent js-ig-dm" href="#" target="_blank" rel="noopener">Otvori Instagram <span aria-hidden="true">↗</span></a>
           </div>
         </form>
       </div>
@@ -257,7 +265,7 @@
 
   <div class="toast mono js-toast" role="status" aria-live="polite"></div>
 
-  <script src="js/data.js?v=4"></script>
-  <script src="js/main.js?v=4"></script>
+  <script src="js/data.js?v=16"></script>
+  <script src="js/main.js?v=16"></script>
 </body>
 </html>
