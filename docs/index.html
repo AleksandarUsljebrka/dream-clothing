@@ -3,26 +3,31 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dream Clothing - Reči koje nosiš</title>
+  <title>Dream Clothing - Citati koje nosiš</title>
   <meta name="description" content="Dream Clothing - crne majice sa citatima. Štampa po porudžbini, iz Srbije. Find your personal style.">
-  <meta property="og:title" content="Dream Clothing - Reči koje nosiš">
+  <!-- Adresa sajta. Ako sajt pređe na svoj domen, promeni je ovde (canonical, og:url, og:image) i u 404.html -->
+  <link rel="canonical" href="https://aleksandarusljebrka.github.io/dream-clothing/">
+  <!-- Pregled linka kad ga neko pošalje (Instagram, Viber, WhatsApp, Facebook).
+       og:image mora da bude puna adresa sa https://, relativnu putanju te aplikacije ne čitaju. -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Dream Clothing">
+  <meta property="og:locale" content="sr_RS">
+  <meta property="og:url" content="https://aleksandarusljebrka.github.io/dream-clothing/">
+  <meta property="og:title" content="Dream Clothing - Citati koje nosiš">
   <meta property="og:description" content="Crne majice sa citatima. Štampa po porudžbini, iz Srbije.">
-  <meta property="og:image" content="img/og.jpg">
+  <meta property="og:image" content="https://aleksandarusljebrka.github.io/dream-clothing/img/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Crna majica sa belim natpisom Overthinking solves nothing">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="theme-color" content="#0b0a09">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%230b0a09'/%3E%3Ctext x='32' y='43' font-family='Arial Black,Arial' font-weight='900' font-size='30' fill='%23efe9df' text-anchor='middle'%3Ed%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <!-- ?v= je verzija: kad menjaš CSS ili JS, povećaj broj, da browser ne koristi staru kopiju iz keša -->
-  <link rel="stylesheet" href="css/style.css?v=17">
-  <!-- Privremeno, za poređenje hero varijanti: ?hero=split (Dream big slika) ili ?hero=full (preko celog ekrana).
-       Bez parametra se prikazuje trag slika. -->
-  <script>
-    (function () {
-      var m = location.search.match(/[?&]hero=(split|full)/);
-      document.documentElement.dataset.hero = m ? m[1] : 'trail';
-    })();
-  </script>
+  <link rel="stylesheet" href="css/style.css?v=22">
 </head>
 <body data-theme="night">
   <div class="grain" aria-hidden="true"></div>
@@ -62,72 +67,59 @@
   </nav>
 
   <main id="top">
-    <!-- TRAG SLIKA: veliko DREAM, a iza njega fotografije prate miš -->
-    <section class="trail-wrap" data-variant="trail" data-theme="night" aria-label="Uvod">
-      <div class="trail js-trail">
-        <div class="trail__imgs js-trail-imgs" aria-hidden="true"></div>
-        <h1 class="trail__word display" aria-label="Dream"><span>D</span><span>R</span><span>E</span><span>A</span><span>M</span></h1>
-        <div class="trail__bottom">
-          <p class="trail__line serif"><em>Majice sa citatom.<br>Štampamo ih tek kad ih poručiš.</em></p>          <a class="btn btn--accent js-ig-dm" href="#" target="_blank" rel="noopener">Naruči na Instagramu <span aria-hidden="true">↗</span></a>
-        </div>
-      </div>
-      <div class="wrap">
-        <div class="tape" aria-hidden="true">
-          <div class="tape__track js-tape"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Privremeno, za poređenje (?hero=split): naslov levo, majica sa istim citatom desno -->
-    <section class="intro-wrap" data-variant="split" data-theme="day" aria-label="Uvod">
-      <div class="wrap intro">
-        <div class="intro__text">
-          <p class="mono intro__kicker">Dream Clothing - Štampa po porudžbini - Srbija</p>
-          <h1 class="intro__title display">
-            <span class="line"><span>Dream big.</span></span>
-            <span class="line"><span>Work hard.</span></span>
-            <span class="line"><span>Stay focused.</span></span>
-          </h1>
-          <p class="intro__sub serif"><em>Reči koje nosiš.</em></p>
-          <div class="intro__actions">
-            <a href="#kolekcija" class="btn">Pogledaj majice <span aria-hidden="true">↓</span></a>
+    <!-- HERO „CITAT NA LEĐIMA": dok skroluješ, fotografija raste do celog ekrana i zumira se na print,
+         a na kraju se pojavi citat sa majice. Pomeranje računa main.js (deo „Hero: citat na leđima"). -->
+    <section class="back-wrap" data-theme="night" aria-label="Uvod">
+      <div class="back js-back">
+        <div class="back__stage">
+          <div class="back__frame js-back-frame">
+            <img class="js-back-img"
+              src="img/hero-back-1365.webp"
+              srcset="img/hero-back-1365.webp 1365w, img/hero-back-2048.webp 2048w, img/hero-back-2730.webp 2730w"
+              sizes="(max-width: 760px) 195vw, 160vw"
+              alt="Momak u crnoj majici sa citatom Overthinking solves nothing, leđima okrenut suncu koje sija kroz lišće"
+              fetchpriority="high">
+            <div class="back__shade js-back-shade"></div>
           </div>
+
+          <div class="back__copy js-back-copy">
+            <p class="mono back__kicker"><span class="nb">Dream Clothing</span> - <span class="nb">Štampa po porudžbini</span> - <span class="nb">Srbija</span></p>
+            <div class="back__bottom">
+            <h1 class="back__title display">
+              <span><i>Citati</i></span>
+              <span><i>koje</i></span>
+              <span><i class="back__accent">nosiš.</i></span>
+            </h1>
+            <p class="back__lead">Crne majice sa citatima na leđima. Štampamo ih tek kad ih poručiš, zato nemamo lager.</p>
+            <div class="back__actions">
+              <a class="btn btn--accent js-ig-dm" href="#" target="_blank" rel="noopener">Naruči na Instagramu <span aria-hidden="true">↗</span></a>
+              <a class="btn btn--light back__more" href="#kolekcija">Pogledaj majice <span aria-hidden="true">↓</span></a>
+            </div>
+            </div>
+          </div>
+
+          <div class="back__badge js-back-badge" aria-hidden="true">
+            <svg viewBox="0 0 200 200">
+              <defs><path id="backCirc" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"></path></defs>
+              <circle cx="100" cy="100" r="99" class="back__badge-bg"></circle>
+              <text class="back__badge-text"><textPath href="#backCirc">Štampa po porudžbini • Dream Clothing • </textPath></text>
+              <circle cx="100" cy="100" r="7" class="back__badge-dot"></circle>
+            </svg>
+          </div>
+
+          <div class="back__end js-back-end">
+            <p class="mono back__end-label">Citat sa leđa</p>
+            <p class="back__end-quote serif"><em>Overthinking<br>solves nothing.</em></p>
+            <a class="btn back__end-btn js-ig-dm" href="#" target="_blank" rel="noopener">Naruči ovu majicu <span aria-hidden="true">↗</span></a>
+          </div>
+
+          <div class="back__hint mono js-back-hint" aria-hidden="true">Skroluj<i></i></div>
         </div>
-        <figure class="intro__photo">
-          <img src="img/dream-big-3-1280.webp" srcset="img/dream-big-3-640.webp 640w, img/dream-big-3-1280.webp 1280w" sizes="(max-width: 760px) 100vw, 50vw" alt="Momak leđima okrenut, u crnoj majici sa natpisom Dream big, work hard, stay focused, naslonjen na crvenu ogradu" fetchpriority="high">
-        </figure>
       </div>
       <div class="wrap">
         <div class="tape" aria-hidden="true">
           <div class="tape__track js-tape"></div>
         </div>
-      </div>
-    </section>
-
-    <!-- Privremeno, za poređenje (?hero=full): hero preko celog ekrana -->
-    <section class="hero-wrap" data-variant="full" data-theme="night" aria-label="Uvod">
-      <div class="hero">
-        <figure class="hero__photo hero__photo--1">
-          <img src="img/nothing-changes-5-1280.webp" alt="Majica Nothing changes if nothing changes na vešalici u otvorenom gepeku, noću pod uličnim svetlima" fetchpriority="high">
-        </figure>
-        <figure class="hero__photo hero__photo--2">
-          <img src="img/overthinking-5-1280.webp" alt="Momak u crnoj majici Overthinking solves nothing, leđima okrenut suncu koje sija kroz lišće">
-        </figure>
-
-        <div class="hero__content">
-          <p class="mono hero__kicker">Dream Clothing - Štampa po porudžbini - Srbija</p>
-          <h1 class="hero__title display">
-            <span class="line"><span>Dream big.</span></span>
-            <span class="line"><span>Work hard.</span></span>
-            <span class="line"><span>Stay focused.</span></span>
-          </h1>
-          <p class="hero__sub serif"><em>Reči koje nosiš.</em></p>
-        </div>
-        <a href="#manifest" class="hero__scroll mono" aria-label="Skroluj dole">Skroluj <span aria-hidden="true">↓</span></a>
-      </div>
-
-      <div class="tape" aria-hidden="true">
-        <div class="tape__track js-tape"></div>
       </div>
     </section>
 
@@ -265,7 +257,7 @@
 
   <div class="toast mono js-toast" role="status" aria-live="polite"></div>
 
-  <script src="js/data.js?v=17"></script>
-  <script src="js/main.js?v=17"></script>
+  <script src="js/data.js?v=22"></script>
+  <script src="js/main.js?v=22"></script>
 </body>
 </html>

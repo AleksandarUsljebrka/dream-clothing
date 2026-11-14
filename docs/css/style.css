@@ -9,8 +9,9 @@
   --bone-2: #e2d9c6;
   --ink: #0b0a09;
   --ink-2: #161412;
+  /* Jedna akcent boja u dva tona: svetliji ide na tamnu pozadinu, tamniji na svetlu (da ostane čitljiv) */
   --sun: #d98a2b;
-  --red: #e3342b;
+  --sun-deep: #b85c0e;
   --cream: #efe9df;
 
   --f-display: 'Anton', 'Impact', 'Arial Narrow', sans-serif;
@@ -30,7 +31,7 @@ body[data-theme="day"] {
   --fg: #14120f;
   --muted: rgba(20, 18, 15, .62);
   --line: rgba(20, 18, 15, .16);
-  --accent: var(--sun);
+  --accent: var(--sun-deep);
   --surface: var(--bone-2);
 }
 body[data-theme="night"] {
@@ -38,7 +39,7 @@ body[data-theme="night"] {
   --fg: var(--cream);
   --muted: rgba(239, 233, 223, .6);
   --line: rgba(239, 233, 223, .14);
-  --accent: var(--red);
+  --accent: var(--sun);
   --surface: var(--ink-2);
 }
 
@@ -74,7 +75,7 @@ h1, h2, h3, p, figure, ol { margin: 0; }
    (Kratke reči kao „u", „i", „da", „se" main.js veže za sledeću reč nevidljivim razmakom.) */
 h1, h2, h3, .manifest__lead, .yourline__title { text-wrap: balance; }
 p, li, summary, figcaption { text-wrap: pretty; }
-::selection { background: var(--accent); color: var(--ink); }
+::selection { background: var(--sun); color: var(--ink); }
 
 /* Jedan kontejner za ceo sajt: ista širina i iste ivice za svaku sekciju */
 .wrap { width: 100%; max-width: calc(var(--container) + 2 * var(--gutter)); margin-inline: auto; padding-inline: var(--gutter); }
@@ -158,131 +159,117 @@ p, li, summary, figcaption { text-wrap: pretty; }
 .menu.is-open .menu__list li:nth-child(2) a { transition-delay: .12s; }
 .menu.is-open .menu__list li:nth-child(3) a { transition-delay: .16s; }
 .menu.is-open .menu__list li:nth-child(4) a { transition-delay: .2s; }
-.menu__list a:active { color: var(--red); }
+.menu__list a:active { color: var(--sun); }
 .menu__foot { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
 .menu__note { color: rgba(239, 233, 223, .6); }
 html.menu-open { overflow: hidden; }
 
 .header__cta { border: 1px solid currentColor; border-radius: 99px; padding: 8px 14px; transition: background .2s ease, color .2s ease, transform .16s var(--ease-out); }
 
-/* ---------- HERO ----------
-   Slika ide preko celog ekrana, a tekst u njoj stoji na ivicama kontejnera (--edge). */
-.hero {
-  --edge: max(var(--gutter), calc((100% - var(--container)) / 2));
-  position: relative; container-type: inline-size;
-  height: 100svh; min-height: 560px;
-  display: grid; grid-template-columns: 1fr 1fr;
-  background: #000; color: var(--cream); overflow: hidden;
-}
-.hero__photo { position: relative; overflow: hidden; }
-.hero__photo img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.1); animation: heroIn 2.6s var(--ease) forwards; }
-.hero__photo--1 img { object-position: 50% 55%; }
-.hero__photo--2 img { object-position: 40% 40%; animation-delay: .15s; }
-@keyframes heroIn { to { transform: scale(1); } }
-
-/* Zatamnjenje odozdo i sleva, tamo gde stoji naslov.
-   Gornji deo ostaje svetliji pa se printovi na majicama i dalje vide. */
-.hero::after {
-  content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
-  background:
-    linear-gradient(0deg, rgba(0,0,0,.82) 0%, rgba(0,0,0,.55) 28%, rgba(0,0,0,.12) 60%, rgba(0,0,0,.2) 100%),
-    linear-gradient(90deg, rgba(0,0,0,.45) 0%, rgba(0,0,0,0) 65%);
-}
-
-.hero__content { position: absolute; z-index: 3; left: 0; right: 0; bottom: 0; padding: 0 var(--edge) clamp(36px, 7vh, 72px); }
-.hero__kicker { color: rgba(239,233,223,.8); margin-bottom: clamp(14px, 1.6cqw, 22px); opacity: 0; animation: fadeUp 1s .9s var(--ease) forwards; }
-.hero__title { font-size: clamp(52px, 9.2cqw, 132px); }
-.hero__title .line { display: block; overflow: hidden; padding-bottom: .02em; }
-.hero__title .line > span { display: inline-block; transform: translateY(105%); animation: lineUp 1.1s var(--ease) forwards; }
-.hero__title .line:nth-child(2) > span { animation-delay: .12s; }
-.hero__title .line:nth-child(3) > span { animation-delay: .24s; }
-.hero__sub { font-size: clamp(24px, 2.6cqw, 36px); margin-top: clamp(12px, 1.4cqw, 20px); color: var(--cream); opacity: 0; animation: fadeUp 1s 1.1s var(--ease) forwards; }
-.hero__scroll { position: absolute; z-index: 3; right: var(--edge); bottom: clamp(36px, 7vh, 72px); display: flex; align-items: center; gap: 8px; text-decoration: none; color: rgba(239,233,223,.85); }
-.hero__scroll span { display: inline-block; animation: bob 1.8s ease-in-out infinite; }
-/* Privremeno, za poređenje: prikazuje se samo hero varijanta izabrana u <html data-hero> */
-[data-variant] { display: none; }
-html[data-hero="trail"] [data-variant="trail"],
-html[data-hero="split"] [data-variant="split"],
-html[data-hero="full"] [data-variant="full"] { display: block; }
-
-/* ---------- TRAG SLIKA (hero) ---------- */
-.trail {
+/* ---------- HERO: CITAT NA LEĐIMA ----------
+   Sekcija je visoka 3 ekrana, a „bina" u njoj stoji zalepljena dok skroluješ.
+   main.js na osnovu skrola pomera: okvir slike (raste do celog ekrana), zum na print,
+   tekst (nestaje) i citat sa kraja (pojavljuje se). Ovde je samo početno stanje. */
+.back { position: relative; height: 300svh; }
+.back__stage {
   --edge: max(var(--gutter), calc((100cqw - var(--container)) / 2));
-  position: relative; container-type: inline-size; isolation: isolate;
-  height: 100svh; min-height: 600px; overflow: hidden;
-  background: var(--ink); color: var(--cream); cursor: crosshair;
+  --cw: calc(100cqw - 2 * var(--edge));
+  /* Zajednički „okvir" za tekst i sliku: ispod headera, sa istim razmakom gore i dole */
+  --pad: clamp(24px, 5svh, 64px);
+  --boxh: calc(100svh - var(--header-h) - 2 * var(--pad));
+  /* Slika: širina po visini ekrana (oblik ~4:5), ali najviše 48% kontejnera; visina najviše 1,3 × širina */
+  --fw: min(calc(var(--cw) * .48), calc(var(--boxh) * .8));
+  --fh: min(var(--boxh), calc(var(--fw) * 1.3));
+  /* Vrh i dno okvira: okvir je vertikalno centriran ispod headera */
+  --ftop: calc(var(--header-h) + var(--pad) + (var(--boxh) - var(--fh)) / 2);
+  --gap: clamp(32px, 4cqw, 80px);
+  position: sticky; top: 0; height: 100svh; overflow: hidden; container-type: inline-size;
+  background: var(--ink); color: var(--cream);
 }
-/* Slike su u svom sloju iznad natpisa i potpuno neprovidne, da se majice vide čisto */
-.trail__imgs { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
-.trail__img {
-  position: absolute; left: -999px; top: -999px;
-  width: clamp(170px, 19vw, 300px); aspect-ratio: 2 / 3; object-fit: cover;
-  opacity: 0; box-shadow: 0 30px 60px rgba(0,0,0,.5);
+.back__frame {
+  position: absolute; z-index: 2; overflow: hidden; border-radius: 6px;
+  top: var(--ftop); right: var(--edge); width: var(--fw); height: var(--fh);
+  animation: backIn 1.6s var(--ease) both;
 }
-.trail__img.go { animation: trailPop 1.8s cubic-bezier(.2, .7, .2, 1) both; }
-.trail__img.still { opacity: 1; transform: rotate(var(--r, 0deg)); }
-/* Slika nikad nije providna: iskoči, stoji, pa je ivica „preseče" odozdo nagore */
-@keyframes trailPop {
-  0% { opacity: 0; transform: scale(.9) rotate(var(--r, 0deg)); clip-path: inset(0 0 0 0); }
-  4% { opacity: 1; }
-  10% { transform: scale(1) rotate(var(--r, 0deg)); }
-  80% { clip-path: inset(0 0 0 0); }
-  100% { opacity: 1; transform: scale(1) rotate(var(--r, 0deg)); clip-path: inset(0 0 100% 0); }
-}
+/* Slika se zumira preko transform: scale (bez will-change, da je browser posle zuma ponovo iscrta oštro) */
+.back__frame img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 52% 50%; transform-origin: 52% 55%; transform: scale(1.02); }
+.back__shade { position: absolute; inset: 0; opacity: 0; background: linear-gradient(180deg, rgba(11, 10, 9, 0) 40%, rgba(11, 10, 9, .85) 100%); }
+@keyframes backIn { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0 0 0 0); } }
 
-/* DREAM je tačno širok kao kontejner sajta */
-.trail__word {
-  position: absolute; left: 50%; top: 50%; z-index: 1; margin: 0;
-  transform: translate(-50%, -56%);
-  font-size: calc((100cqw - 2 * var(--edge)) / 2.52); /* 2.52 = širina reči DREAM u Anton fontu, u em */
-  line-height: .8; letter-spacing: -.01em; white-space: nowrap;
-  color: var(--cream); pointer-events: none;
+/* Tekst ima iste gornje i donje ivice kao slika:
+   mali tekst je poravnat sa vrhom slike, a naslov, opis i dugmad sa dnom slike.
+   Desno ostaje 90px za okruglu oznaku, da je ništa ne preklopi. */
+.back__copy {
+  position: absolute; z-index: 3;
+  top: var(--ftop); height: var(--fh); left: var(--edge);
+  width: calc(var(--cw) - var(--fw) - var(--gap)); padding-right: 90px;
+  display: flex; flex-direction: column; justify-content: space-between;
 }
-.trail__word span { display: inline-block; animation: trailUp 1.2s var(--ease) both; }
-.trail__word span:nth-child(2) { animation-delay: .07s; }
-.trail__word span:nth-child(3) { animation-delay: .14s; }
-.trail__word span:nth-child(4) { animation-delay: .21s; }
-.trail__word span:nth-child(5) { animation-delay: .28s; }
-@keyframes trailUp { from { transform: translateY(40%); opacity: 0; } to { transform: none; opacity: 1; } }
+.back__kicker { color: rgba(239, 233, 223, .7); }
+.back__bottom { display: flex; flex-direction: column; }
+/* Naslov raste i sa širinom i sa visinom ekrana, pa ostaje u istom odnosu prema slici */
+.back__title { font-size: clamp(52px, min(9cqw, 13svh), 200px); line-height: .9; }
+.back__title span { display: block; overflow: hidden; padding: 0 .12em .04em 0; }
+.back__title i { display: block; font-style: inherit; animation: lineUp 1.1s var(--ease) both; }
+.back__title span:nth-child(1) i { transform: translateY(105%); }
+.back__title span:nth-child(2) i { transform: translateY(105%); animation-delay: .08s; }
+.back__title span:nth-child(3) i { transform: translateY(105%); animation-delay: .16s; }
+.back__title .back__accent { font-family: var(--f-serif); font-style: italic; text-transform: none; letter-spacing: -.02em; color: var(--sun); }
+.back__lead { max-width: 30em; margin-top: clamp(16px, 3svh, 32px); font-size: clamp(16px, 2.1svh, 20px); line-height: 1.5; color: rgba(239, 233, 223, .78); }
+.back__actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: clamp(18px, 3.4svh, 36px); }
+.back__kicker, .back__lead, .back__actions { animation: fadeUp 1s .6s var(--ease) both; }
+.back__more { color: var(--cream); border-color: rgba(239, 233, 223, .4); }
 
-.trail__bottom {
-  position: absolute; z-index: 3; left: var(--edge); right: var(--edge); bottom: clamp(28px, 6vh, 56px);
-  display: flex; justify-content: space-between; align-items: flex-end; gap: 24px;
+/* Okrugla oznaka na levoj ivici slike, u visini dugmadi */
+.back__badge {
+  position: absolute; z-index: 4; width: 140px; height: 140px;
+  left: calc(100cqw - var(--edge) - var(--fw) - 70px);
+  top: calc(var(--ftop) + var(--fh) - 140px - clamp(16px, 4svh, 48px));
 }
-/* Prelom je ručno posle prve rečenice; nowrap da se druga rečenica ne lomi */
-.trail__line { font-size: clamp(22px, 2.2vw, 30px); line-height: 1.15; white-space: nowrap; }
-.btn.btn--accent { background: var(--red); border-color: var(--red); color: #fff; }
+.back__badge svg { width: 100%; height: 100%; animation: backSpin 18s linear infinite; }
+.back__badge-bg { fill: var(--ink); }
+.back__badge-dot { fill: var(--cream); }
+.back__badge-text { fill: var(--cream); font-family: var(--f-mono); font-size: 15px; letter-spacing: 4px; text-transform: uppercase; }
+@keyframes backSpin { to { transform: rotate(360deg); } }
 
-/* ---------- INTRO (novi hero) ---------- */
-.intro-wrap { padding-top: var(--header-h); }
-.intro {
-  display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: clamp(16px, 3vw, 48px);
-  min-height: calc(100svh - var(--header-h) - 64px);
-  padding-top: clamp(12px, 2vw, 28px); padding-bottom: clamp(24px, 3vw, 40px);
+/* Kraj: citat sa majice preko zumirane slike */
+.back__end { position: absolute; z-index: 5; left: var(--edge); bottom: var(--pad); opacity: 0; transform: translateY(40px); pointer-events: none; }
+.back__end-label { color: rgba(239, 233, 223, .75); margin-bottom: 14px; }
+.back__end-quote { font-size: clamp(44px, min(6cqw, 10svh), 120px); line-height: .95; }
+.btn.back__end-btn { margin-top: clamp(18px, 3svh, 28px); background: var(--cream); border-color: var(--cream); color: var(--ink); }
+
+.back__hint { position: absolute; z-index: 5; left: 50%; bottom: 16px; transform: translateX(-50%); text-align: center; color: rgba(239, 233, 223, .7); }
+.back__hint i { display: block; width: 1px; height: 32px; margin: 8px auto 0; background: var(--cream); transform-origin: top; animation: backLine 1.8s ease-in-out infinite; }
+@keyframes backLine { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(0); transform-origin: bottom; } }
+
+/* Uski ekrani, tablet uspravno i niski ekrani (npr. telefon položeno):
+   slika je od početka preko celog ekrana, a tekst stoji preko nje.
+   ISTI UPIT je u main.js (const mobile), menjaj ih zajedno. */
+@media (max-width: 760px), (max-width: 1024px) and (orientation: portrait), (max-height: 560px) {
+  .back__frame { top: 0; right: 0; width: 100%; height: 100%; border-radius: 0; }
+  .back__copy {
+    top: calc(var(--header-h) + 16px); bottom: var(--pad); height: auto;
+    left: var(--gutter); width: calc(100cqw - 2 * var(--gutter)); padding-right: 0;
+    /* Tekst stoji dole; ako ne stane, gura se nadole umesto ispod headera */
+    justify-content: safe flex-end; gap: 16px;
+  }
+  .back__kicker { margin-bottom: 4px; }
+  .back__title { font-size: clamp(48px, min(17cqw, 11svh), 120px); }
+  .back__lead { font-size: 16px; max-width: 34em; }
+  .back__badge, .back__hint { display: none; }
+  /* Jače zatamnjenje odozdo: tekst stoji preko printa, pa mora jasno da se odvoji od njega */
+  .back__shade { opacity: .85; background: linear-gradient(180deg, rgba(11, 10, 9, .1) 0%, rgba(11, 10, 9, .25) 25%, rgba(11, 10, 9, .8) 50%, rgba(11, 10, 9, .95) 100%); }
+  .back__end { left: var(--gutter); right: var(--gutter); }
 }
-.intro__text { grid-column: 1 / 7; align-self: end; container-type: inline-size; padding-bottom: clamp(4px, 1.5vw, 20px); }
-.intro__kicker { color: var(--muted); margin-bottom: clamp(18px, 2vw, 28px); opacity: 0; animation: fadeUp 1s .7s var(--ease) forwards; }
-.intro__title { font-size: clamp(44px, 18cqw, 128px); }
-.intro__title .line { display: block; overflow: hidden; padding-bottom: .02em; }
-.intro__title .line > span { display: inline-block; transform: translateY(105%); animation: lineUp 1.1s var(--ease) forwards; }
-.intro__title .line:nth-child(2) > span { animation-delay: .12s; }
-.intro__title .line:nth-child(3) > span { animation-delay: .24s; }
-.intro__title .line:last-child { color: var(--accent); }
-.intro__sub { font-size: clamp(26px, 2.6vw, 38px); margin-top: clamp(14px, 1.6vw, 22px); opacity: 0; animation: fadeUp 1s .9s var(--ease) forwards; }
-.intro__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: clamp(28px, 3vw, 44px); opacity: 0; animation: fadeUp 1s 1.05s var(--ease) forwards; }
-.intro__photo { grid-column: 7 / 13; position: relative; overflow: hidden; background: var(--surface); min-height: 440px; }
-.intro__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; transform: scale(1.08); animation: heroIn 2.6s var(--ease) forwards; }
-.intro-wrap .tape { background: var(--ink); color: var(--cream); }
 
 @keyframes lineUp { to { transform: translateY(0); } }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-@keyframes bob { 50% { transform: translateY(4px); } }
 
 /* ---------- TRAKA SA PORUKAMA ---------- */
 .tape { background: var(--bone); color: var(--ink); overflow: hidden; padding: 12px 0; }
 .tape__track { display: flex; width: max-content; animation: marquee 60s linear infinite; }
 .tape__item { font-family: var(--f-display); text-transform: uppercase; font-size: clamp(20px, 2.2vw, 30px); line-height: 1; white-space: nowrap; display: flex; align-items: center; }
-.tape__x { color: var(--red); margin-inline: .6em; font-family: var(--f-sans); font-weight: 900; font-size: .7em; }
+.tape__x { color: var(--sun-deep); margin-inline: .6em; font-family: var(--f-sans); font-weight: 900; font-size: .7em; }
 @keyframes marquee { to { transform: translateX(-50%); } }
 
 /* ---------- MANIFEST ---------- */
@@ -357,6 +344,8 @@ html[data-hero="full"] [data-variant="full"] { display: block; }
   transition: background .2s ease, border-color .2s ease, color .2s ease, transform .16s var(--ease-out);
 }
 .btn--light { background: transparent; color: var(--fg); }
+/* Glavno dugme: narandžasta pozadina sa tamnim tekstom (kontrast 7:1) */
+.btn.btn--accent { background: var(--sun); border-color: var(--sun); color: var(--ink); }
 
 /* ---------- GALERIJA ---------- */
 /* Cela sekcija staje u otprilike jedan ekran: naslov + dva reda od po 38vh (30vh na telefonu) */
@@ -483,7 +472,7 @@ html[data-hero="full"] [data-variant="full"] { display: block; }
   .nav a:hover::after { transform: scaleX(1); transform-origin: left; }
   .header__cta:hover { background: var(--fg); color: var(--bg); border-color: var(--fg); }
   .menu-open .header__cta:hover { background: var(--cream); color: var(--ink); }
-  .btn:hover { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+  .btn:hover { background: var(--sun); border-color: var(--sun); color: var(--ink); }
   .btn.btn--accent:hover { background: var(--cream); border-color: var(--cream); color: var(--ink); }
   .bar:hover::before { background: var(--accent); }
   .slider__arrow:hover:not(:disabled) { background: var(--fg); color: var(--bg); border-color: var(--fg); }
@@ -491,7 +480,7 @@ html[data-hero="full"] [data-variant="full"] { display: block; }
   .gcard:hover .gcard__cap { transform: none; }
   .steps li:hover .steps__n { color: var(--accent); -webkit-text-stroke-color: var(--accent); }
   .lightbox__nav:hover { opacity: 1; }
-  .menu__list a:hover { color: var(--red); }
+  .menu__list a:hover { color: var(--sun); }
 }
 
 /* ---------- RESPONSIVE ---------- */
@@ -509,22 +498,6 @@ html[data-hero="full"] [data-variant="full"] { display: block; }
   :root { --header-h: 64px; }
   body { font-size: 16px; }
   .logo { font-size: 24px; }
-
-  /* Hero: jedna fotografija preko cele širine, druga se pojavljuje preko nje */
-  .hero { grid-template-columns: 1fr; min-height: 480px; }
-
-  .trail { min-height: 520px; cursor: auto; }
-  .trail__img { width: clamp(130px, 40vw, 190px); }
-  .trail__bottom { flex-direction: column; align-items: flex-start; gap: 18px; }
-
-  .intro { grid-template-columns: minmax(0, 1fr); row-gap: 28px; min-height: 0; padding-top: 20px; }
-  .intro__text, .intro__photo { grid-column: 1; }
-  .intro__photo { min-height: 0; aspect-ratio: 4 / 5; }
-  .hero__photo { position: absolute; inset: 0; }
-  .hero__photo--1 { z-index: 1; animation: photoCycle 9s 2s ease-in-out infinite; opacity: 0; }
-  @keyframes photoCycle { 0%, 38% { opacity: 0; } 50%, 88% { opacity: 1; } 100% { opacity: 0; } }
-  .hero__title { font-size: clamp(46px, 14.5cqw, 96px); }
-  .hero__scroll { display: none; }
 
   .manifest__cols { grid-template-columns: 1fr; gap: 28px; }
 
@@ -557,13 +530,16 @@ html[data-hero="full"] [data-variant="full"] { display: block; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; }
   .grain { animation: none; }
-  .hero__photo--1 { opacity: 1; }
-  .trail__img.still { opacity: 1; }
   .reveal { transform: none; transition: opacity .4s ease; }
   .design__quote .line > span { transform: none; transition: none; }
   .gcard img, .gcard__cap, .nav a::after, .faq__list summary::after { transition: none; }
   .toast, .toast.is-on { transition: visibility 0s; }
   .btn:active, .header__cta:active, .slider__arrow:active, .gcard:active { transform: none; }
+  /* Hero bez skrol animacije: obična sekcija od jednog ekrana, slika i tekst stoje mirno */
+  .back { height: auto; }
+  .back__stage { position: relative; }
+  .back__end, .back__hint { display: none; }
+  .back__title i { transform: none; }
   /* Meni: samo se pojavi bledeći, bez zavese i bez pomeranja stavki */
   .menu { clip-path: none; opacity: 0; transition: opacity .2s ease, visibility 0s .2s; }
   .menu.is-open { opacity: 1; transition: opacity .2s ease, visibility 0s; }

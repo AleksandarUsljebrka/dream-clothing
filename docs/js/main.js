@@ -54,91 +54,65 @@
     matchMedia('(min-width: 1025px)').addEventListener('change', e => { if (e.matches) setMenu(false); });
   })();
 
-  /* ---------- Hero: trag slika ---------- */
+  /* ---------- Hero: citat na leđima ----------
+     Skrol kroz sekciju (3 ekrana) daje napredak p od 0 do 1:
+     - p:  okvir slike raste od uokvirene fotografije do celog ekrana, tekst nestaje
+     - p2: (od 25% skrola) zum na print, najviše 1,6x (1,35x na telefonu), da slika ostane oštra
+     - p3: (od 78% skrola) zatamnjenje odozdo i citat sa majice */
   (() => {
-    const root = $('.js-trail');
-    if (!root || document.documentElement.dataset.hero !== 'trail') return;
-    const layer = $('.js-trail-imgs', root);
+    const root = $('.js-back');
+    if (!root) return;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; // CSS prikazuje mirnu verziju
+    const stage = root.firstElementChild;
+    const frame = $('.js-back-frame', root), img = $('.js-back-img', root), shade = $('.js-back-shade', root);
+    const copy = $('.js-back-copy', root), badge = $('.js-back-badge', root);
+    const end = $('.js-back-end', root), hint = $('.js-back-hint', root);
+    // ISTI UPIT kao u style.css (hero preko celog ekrana): uski ekrani, tablet uspravno, niski ekrani
+    const mobile = matchMedia('(max-width: 760px), (max-width: 1024px) and (orientation: portrait), (max-height: 560px)');
+    const clamp = v => Math.max(0, Math.min(1, v));
+    let start = null, raf = 0;
 
-    // Po dve fotografije iz svakog dizajna, izmešane da se iste majice ne nižu jedna za drugom
-    const picks = [];
-    for (let n = 1; n <= 2; n++) designs.forEach(d => { if (n <= d.photos) picks.push(src(d.slug, n, 640)); });
-    const imgs = picks.map((s, i) => {
-      const img = new Image();
-      // Prve 4 slike imaju prednost pri učitavanju, da trag krene odmah po otvaranju stranice
-      if (i < 4) img.fetchPriority = 'high';
-      img.src = s; img.alt = ''; img.className = 'trail__img'; img.decoding = 'async';
-      layer.appendChild(img);
-      return img;
-    });
-
-    // Mirna verzija: par slika oko natpisa, bez kretanja
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      [[.2, .3, -6], [.8, .28, 5], [.3, .74, 4], [.72, .72, -4]].forEach(([x, y, r], i) => {
-        const el = imgs[i * 3 % imgs.length];
-        el.style.left = `calc(${x * 100}% - ${el.offsetWidth / 2 || 100}px)`;
-        el.style.top = `calc(${y * 100}% - ${el.offsetHeight / 2 || 150}px)`;
-        el.style.setProperty('--r', `${r}deg`);
-        el.classList.add('still');
-      });
-      return;
-    }
-
-    // -Infinity: niko još nije pomerio miš i nijedna slika nije iskočila, pa trag kreće odmah
-    let k = 0, z = 1, last = null, lastMove = -Infinity, lastSpawn = -Infinity, t = 0, raf = 0;
-    const touch = matchMedia('(pointer: coarse)').matches;
-    // 1,3 sekunde pauze posle otvaranja stranice: prvo se pojavi natpis DREAM, pa tek onda slike
-    const autoStartAt = performance.now() + 1300;
-    // Nova slika iskače tek kad se miš pomeri dovoljno daleko (gap)
-    // i kad prođe dovoljno vremena od prethodne (minDelay), da ih ne bude previše odjednom
-    const spawn = (x, y, minDelay) => {
-      const now = performance.now();
-      const gap = Math.max(touch ? 110 : 150, Math.min(280, root.clientWidth * 0.16));
-      if (last && Math.hypot(x - last.x, y - last.y) < gap) return;
-      if (now - lastSpawn < minDelay) return;
-      // Sledeća slika koja je već učitana (prazan okvir nikad ne iskače)
-      let el = null;
-      for (let s = 0; s < imgs.length; s++) {
-        const c = imgs[(k + s) % imgs.length];
-        if (c.complete && c.naturalWidth) { el = c; k += s + 1; break; }
-      }
-      if (!el) return;
-      last = { x, y };
-      lastSpawn = now;
-      const w = el.offsetWidth || 200, h = el.offsetHeight || 300;
-      el.style.left = `${x - w / 2}px`;
-      el.style.top = `${y - h / 2}px`;
-      el.style.zIndex = String(++z);
-      el.style.setProperty('--r', `${((Math.random() - 0.5) * 10).toFixed(1)}deg`);
-      el.classList.remove('go');
-      void el.offsetWidth; // restart animacije
-      el.classList.add('go');
+    // Početni položaj okvira čita se iz CSS-a (posle svake promene veličine prozora)
+    const measure = () => {
+      ['top', 'right', 'bottom', 'width', 'height', 'borderRadius'].forEach(k => { frame.style[k] = ''; });
+      const s = stage.getBoundingClientRect(), f = frame.getBoundingClientRect();
+      start = { top: f.top - s.top, right: s.right - f.right, bottom: s.bottom - f.bottom, width: f.width, radius: mobile.matches ? 0 : 6 };
+      update();
     };
 
-    root.addEventListener('pointermove', e => {
-      if (e.pointerType !== 'mouse') return;
-      lastMove = performance.now();
-      const r = root.getBoundingClientRect();
-      spawn(e.clientX - r.left, e.clientY - r.top, 180);
-    });
-
-    // Kad miš miruje (ili na telefonu), slike same idu po talasastoj putanji
-    const tick = () => {
-      raf = requestAnimationFrame(tick);
-      if (performance.now() < autoStartAt) return;
-      if (performance.now() - lastMove < 2500) return;
-      t += 0.006;
-      const w = root.clientWidth, h = root.clientHeight;
-      // Na telefonu (nema miša) slike se smenjuju malo češće
-      spawn(w * (0.5 + 0.36 * Math.sin(t * 1.3)), h * (0.5 + 0.3 * Math.sin(t * 2.1 + 0.6)), touch ? 550 : 700);
+    const update = () => {
+      raf = 0;
+      const total = root.offsetHeight - stage.offsetHeight;
+      const p = total > 0 ? clamp(-root.getBoundingClientRect().top / total) : 0;
+      const p2 = clamp((p - 0.25) / 0.75);
+      const p3 = clamp((p - 0.78) / 0.2);
+      const k = 1 - p;
+      frame.style.height = 'auto'; // visinu određuju top i bottom
+      frame.style.top = `${start.top * k}px`;
+      frame.style.right = `${start.right * k}px`;
+      frame.style.bottom = `${start.bottom * k}px`;
+      frame.style.width = `${start.width + (stage.clientWidth - start.width) * p}px`;
+      frame.style.borderRadius = `${start.radius * k}px`;
+      const maxZoom = mobile.matches ? 1.35 : 1.6;
+      img.style.transform = `scale(${(1.02 + (maxZoom - 1.02) * p2).toFixed(4)})`;
+      shade.style.opacity = mobile.matches ? (0.85 + 0.15 * p3).toFixed(3) : p3.toFixed(3);
+      copy.style.opacity = Math.max(0, 1 - p * 2.4).toFixed(3);
+      copy.style.transform = `translateY(${(-90 * p).toFixed(1)}px)`;
+      copy.style.pointerEvents = p > 0.35 ? 'none' : '';
+      badge.style.opacity = Math.max(0, 1 - p * 3).toFixed(3);
+      end.style.opacity = p3.toFixed(3);
+      end.style.transform = `translateY(${((1 - p3) * 40).toFixed(1)}px)`;
+      end.style.pointerEvents = p3 > 0.5 ? 'auto' : 'none';
+      hint.style.opacity = Math.max(0, 1 - p * 5).toFixed(3);
     };
 
-    // Animacija radi samo dok je hero na ekranu
-    new IntersectionObserver(([en]) => {
-      cancelAnimationFrame(raf);
-      if (en.isIntersecting) raf = requestAnimationFrame(tick);
-    }).observe(root);
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', measure);
+    mobile.addEventListener('change', measure);
+    measure();
   })();
+
   /* ---------- Kolekcija ---------- */
   $$('.js-designs').forEach(list => {
     const mood = list.dataset.mood;
@@ -389,7 +363,7 @@
      Citati sa majica su na engleskom i ne diraju se. */
   (() => {
     const short = /(^|[\s(„])(a|i|o|u|s|k|da|se|ti|je|na|za|po|od|do|iz|sa|ne|ni|mi|ih|kad|što) (?=\S)/gi;
-    const skip = '.design__quote, .tape, .gcard__cap, .trail__word, .footer__claim, textarea, script';
+    const skip = '.design__quote, .tape, .gcard__cap, .footer__claim, textarea, script';
     $$('p, h1, h2, h3, summary, li, .chapter__desc').forEach(el => {
       if (el.closest(skip)) return;
       const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
